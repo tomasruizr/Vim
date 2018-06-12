@@ -256,6 +256,12 @@ export class ModeHandler implements vscode.Disposable {
   }
 
   private setCurrentMode(modeName: ModeName): void {
+    // Modified By Tomás Ruiz to avoid all the InsertMode quirks. Just disables Vim when in insertMode.
+    if (modeName === 1) {
+      console.log('estoy en insert mode');
+      vscode.commands.executeCommand('toggleVim');
+      // modeName = 10;
+    }
     this.vimState.currentMode = modeName;
     for (let mode of this._modes) {
       mode.isActive = mode.name === modeName;

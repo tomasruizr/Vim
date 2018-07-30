@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as modes from './modes';
 
-import { CommandLine } from '../cmd_line/commandLine';
+import { commandLine } from '../cmd_line/commandLine';
 import { configuration } from '../configuration/configuration';
 import { Decoration } from '../configuration/decoration';
 import { Remappers } from '../configuration/remapper';
@@ -52,6 +52,7 @@ export class ModeHandler implements vscode.Disposable {
       new modes.VisualBlockMode(),
       new modes.VisualLineMode(),
       new modes.SearchInProgressMode(),
+      new modes.CommandlineInProgress(),
       new modes.ReplaceMode(),
       new modes.EasyMotionMode(),
       new modes.EasyMotionInputMode(),
@@ -176,6 +177,10 @@ export class ModeHandler implements vscode.Disposable {
     }
 
     if (this.vimState.currentMode === ModeName.SearchInProgressMode) {
+      return;
+    }
+
+    if (this.vimState.currentMode === ModeName.CommandlineInProgress) {
       return;
     }
 
@@ -306,7 +311,6 @@ export class ModeHandler implements vscode.Disposable {
 
     try {
       // Take the count prefix out to perform the correct remapping.
-      const keys = this.vimState.recordedState.getCurrentCommandWithoutCountPrefix();
       const withinTimeout = now - this.vimState.lastKeyPressedTimestamp < configuration.timeout;
 
       let handled = false;
@@ -316,14 +320,16 @@ export class ModeHandler implements vscode.Disposable {
        *
        * 1) We are not already performing a nonrecursive remapping.
        * 2) We haven't timed out of our previous remapping.
-       * 3) We are not running tests as user remappings bork tests
        */
       if (
         !this.vimState.isCurrentlyPerformingRemapping &&
-        (withinTimeout || keys.length === 1) &&
-        !Globals.isTesting
+        (withinTimeout || this.vimState.recordedState.commandList.length === 1)
       ) {
-        handled = await this._remappers.sendKey(keys, this, this.vimState);
+        handled = await this._remappers.sendKey(
+          this.vimState.recordedState.commandList,
+          this,
+          this.vimState
+        );
       }
 
       if (handled) {
@@ -361,9 +367,9 @@ export class ModeHandler implements vscode.Disposable {
       case KeypressState.NoPossibleMatch:
         if (!this._remappers.isPotentialRemap) {
           vimState.recordedState = new RecordedState();
-          return vimState;
         }
-        break;
+
+        return vimState;
       case KeypressState.WaitingOnKeys:
         return vimState;
     }
@@ -496,9 +502,27 @@ export class ModeHandler implements vscode.Disposable {
       this.setCurrentMode(vimState.currentMode);
 
       // We don't want to mark any searches as a repeatable action
-      if (vimState.currentMode === ModeName.Normal && prevState !== ModeName.SearchInProgressMode) {
+      if (
+        vimState.currentMode === ModeName.Normal &&
+        prevState !== ModeName.SearchInProgressMode &&
+        prevState !== ModeName.CommandlineInProgress
+      ) {
         ranRepeatableAction = true;
       }
+    }
+
+    // Set context for overriding cmd-V, this is only done in search entry and
+    // commandline modes
+    if (
+      this.IsModeWhereCmdVIsOverriden(vimState.currentMode) &&
+      !this.IsModeWhereCmdVIsOverriden(prevState)
+    ) {
+      await vscode.commands.executeCommand('setContext', 'vim.overrideCmdV', true);
+    } else if (
+      this.IsModeWhereCmdVIsOverriden(prevState) &&
+      !this.IsModeWhereCmdVIsOverriden(vimState.currentMode)
+    ) {
+      await vscode.commands.executeCommand('setContext', 'vim.overrideCmdV', false);
     }
 
     if (recordedState.operatorReadyToExecute(vimState.currentMode)) {
@@ -631,7 +655,7 @@ export class ModeHandler implements vscode.Disposable {
 
     vimState.historyTracker.setLastHistoryEndPosition(vimState.allCursors.map(x => x.stop));
 
-    if (this.currentMode.isVisualMode) {
+    if (this.currentMode.isVisualMode && !this.vimState.isRunningDotCommand) {
       // Store selection for commands like gv
       this.vimState.lastVisualMode = this.vimState.currentMode;
       this.vimState.lastVisualSelectionStart = this.vimState.cursorStartPosition;
@@ -911,15 +935,10 @@ export class ModeHandler implements vscode.Disposable {
           vimState.cursorPosition = Position.FromVSCodePosition(this.vimState.editor.selection.end);
           break;
 
-        case 'showCommandLine':
-          await CommandLine.PromptAndRun(vimState.commandInitialText, this.vimState);
-          this.updateView(this.vimState);
-          break;
-
         case 'showCommandHistory':
-          let cmd = await CommandLine.ShowHistory(vimState.commandInitialText, this.vimState);
+          let cmd = await commandLine.ShowHistory(vimState.currentCommandlineText, this.vimState);
           if (cmd && cmd.length !== 0) {
-            await CommandLine.PromptAndRun(cmd, this.vimState);
+            await commandLine.Run(cmd, this.vimState);
             this.updateView(this.vimState);
           }
           break;
@@ -974,6 +993,20 @@ export class ModeHandler implements vscode.Disposable {
           break;
         case 'tab':
           await vscode.commands.executeCommand('tab');
+          if (command.diff) {
+            if (command.cursorIndex === undefined) {
+              throw new Error('No cursor index - this should never ever happen!');
+            }
+
+            if (!accumulatedPositionDifferences[command.cursorIndex]) {
+              accumulatedPositionDifferences[command.cursorIndex] = [];
+            }
+
+            accumulatedPositionDifferences[command.cursorIndex].push(command.diff);
+          }
+          break;
+        case 'reindent':
+          await vscode.commands.executeCommand('editor.action.reindentselectedlines');
           if (command.diff) {
             if (command.cursorIndex === undefined) {
               throw new Error('No cursor index - this should never ever happen!');
@@ -1085,6 +1118,16 @@ export class ModeHandler implements vscode.Disposable {
     const surroundKeys = recordedState.surroundKeys;
 
     vimState.isRunningDotCommand = true;
+
+    // If a previous visual selection exists, store it for use in replay of some
+    // commands
+    if (vimState.lastVisualSelectionStart && vimState.lastVisualSelectionEnd) {
+      vimState.dotCommandPreviousVisualSelection = new vscode.Selection(
+        vimState.lastVisualSelectionStart,
+        vimState.lastVisualSelectionEnd
+      );
+    }
+
     recordedState = new RecordedState();
     vimState.recordedState = recordedState;
 
@@ -1151,10 +1194,14 @@ export class ModeHandler implements vscode.Disposable {
 
     if (args.drawSelection) {
       let selections: vscode.Selection[];
-      const selectionMode: ModeName =
-        vimState.currentMode === ModeName.SearchInProgressMode
-          ? vimState.globalState.searchState!.previousMode
-          : vimState.currentMode;
+
+      let selectionMode: ModeName = vimState.currentMode;
+      if (vimState.currentMode === ModeName.SearchInProgressMode) {
+        selectionMode = vimState.globalState.searchState!.previousMode;
+      }
+      if (vimState.currentMode === ModeName.CommandlineInProgress) {
+        selectionMode = commandLine.previousMode;
+      }
 
       if (!vimState.isMultiCursor) {
         let start = vimState.cursorStartPosition;
@@ -1376,7 +1423,7 @@ export class ModeHandler implements vscode.Disposable {
           [background, foreground] = colorToSet;
         }
 
-        StatusBar.SetColor(background, foreground);
+        StatusBar.SetColor(this.vimState.currentMode, background, foreground);
       }
     }
 
@@ -1400,6 +1447,7 @@ export class ModeHandler implements vscode.Disposable {
 
     let forceUpdate =
       this.currentMode.name === ModeName.SearchInProgressMode ||
+      this.currentMode.name === ModeName.CommandlineInProgress ||
       this.vimState.isRecordingMacro ||
       configuration.showcmd;
 
@@ -1465,5 +1513,9 @@ export class ModeHandler implements vscode.Disposable {
         this.vimState.prevSelection = this.vimState.editor.selection;
       }
     }, 0);
+  }
+
+  private IsModeWhereCmdVIsOverriden(mode: ModeName): boolean {
+    return mode === ModeName.SearchInProgressMode || mode === ModeName.CommandlineInProgress;
   }
 }

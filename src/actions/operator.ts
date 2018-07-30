@@ -7,7 +7,7 @@ import { ModeName } from './../mode/mode';
 import { Register, RegisterMode } from './../register/register';
 import { VimState } from './../state/vimState';
 import { TextEditor } from './../textEditor';
-import { BaseAction, compareKeypressSequence, RegisterAction } from './base';
+import { BaseAction, RegisterAction } from './base';
 import { CommandNumber } from './commands/actions';
 import { TextObjectMovement } from './textobject';
 
@@ -32,12 +32,12 @@ export class BaseOperator extends BaseAction {
     if (this.modes.indexOf(vimState.currentMode) === -1) {
       return false;
     }
-    if (!compareKeypressSequence(this.keys, keysPressed)) {
+    if (!BaseAction.CompareKeypressSequence(this.keys, keysPressed)) {
       return false;
     }
     if (
       this.mustBeFirstKey &&
-      vimState.recordedState.numberOfKeysInCommandWithoutCountPrefix - keysPressed.length > 0
+      vimState.recordedState.commandWithoutCountPrefix.length - keysPressed.length > 0
     ) {
       return false;
     }
@@ -52,12 +52,12 @@ export class BaseOperator extends BaseAction {
     if (this.modes.indexOf(vimState.currentMode) === -1) {
       return false;
     }
-    if (!compareKeypressSequence(this.keys.slice(0, keysPressed.length), keysPressed)) {
+    if (!BaseAction.CompareKeypressSequence(this.keys.slice(0, keysPressed.length), keysPressed)) {
       return false;
     }
     if (
       this.mustBeFirstKey &&
-      vimState.recordedState.numberOfKeysInCommandWithoutCountPrefix - keysPressed.length > 0
+      vimState.recordedState.commandWithoutCountPrefix.length - keysPressed.length > 0
     ) {
       return false;
     }
@@ -81,7 +81,7 @@ export class BaseOperator extends BaseAction {
       // The previous action is the same as the one we're testing
       prevAction.constructor === this.constructor &&
       // The key pressed is the same as the previous action's last key.
-      compareKeypressSequence(prevAction.keysPressed.slice(-1), keysPressed)
+      BaseAction.CompareKeypressSequence(prevAction.keysPressed.slice(-1), keysPressed)
     );
   }
 
@@ -481,6 +481,20 @@ class IndentOperatorInVisualModesIsAWeirdSpecialCase extends BaseOperator {
   keys = ['>'];
 
   public async run(vimState: VimState, start: Position, end: Position): Promise<VimState> {
+    // Repeating this command with dot should apply the indent to the previous selection
+    if (vimState.isRunningDotCommand && vimState.dotCommandPreviousVisualSelection) {
+      if (vimState.cursorStartPosition.isAfter(vimState.cursorPosition)) {
+        const shiftSelectionByNum =
+          vimState.dotCommandPreviousVisualSelection.end.line -
+          vimState.dotCommandPreviousVisualSelection.start.line;
+
+        start = vimState.cursorStartPosition;
+        const newEnd = vimState.cursorStartPosition.getDownByCount(shiftSelectionByNum);
+
+        vimState.editor.selection = new vscode.Selection(start, newEnd);
+      }
+    }
+
     for (let i = 0; i < (vimState.recordedState.count || 1); i++) {
       await vscode.commands.executeCommand('editor.action.indentLines');
     }
@@ -517,6 +531,20 @@ class OutdentOperatorInVisualModesIsAWeirdSpecialCase extends BaseOperator {
   keys = ['<'];
 
   public async run(vimState: VimState, start: Position, end: Position): Promise<VimState> {
+    // Repeating this command with dot should apply the indent to the previous selection
+    if (vimState.isRunningDotCommand && vimState.dotCommandPreviousVisualSelection) {
+      if (vimState.cursorStartPosition.isAfter(vimState.cursorPosition)) {
+        const shiftSelectionByNum =
+          vimState.dotCommandPreviousVisualSelection.end.line -
+          vimState.dotCommandPreviousVisualSelection.start.line;
+
+        start = vimState.cursorStartPosition;
+        const newEnd = vimState.cursorStartPosition.getDownByCount(shiftSelectionByNum);
+
+        vimState.editor.selection = new vscode.Selection(start, newEnd);
+      }
+    }
+
     for (let i = 0; i < (vimState.recordedState.count || 1); i++) {
       await vscode.commands.executeCommand('editor.action.outdentLines');
     }
@@ -566,21 +594,36 @@ export class ChangeOperator extends BaseOperator {
   }
 
   public async runRepeat(vimState: VimState, position: Position, count: number): Promise<VimState> {
-    const lineIsAllWhitespace = TextEditor.getLineAt(position).text.trim() === '';
+    const thisLineIndent = vimState.editor.document.getText(
+      new vscode.Range(position.getLineBegin(), position.getLineBeginRespectingIndent())
+    );
+
     vimState.currentRegisterMode = RegisterMode.LineWise;
-    if (lineIsAllWhitespace) {
-      return this.run(
-        vimState,
-        position.getLineBegin(),
-        position.getDownByCount(Math.max(0, count - 1)).getLineEnd()
-      );
-    } else {
-      return this.run(
-        vimState,
-        position.getLineBeginRespectingIndent(),
-        position.getDownByCount(Math.max(0, count - 1)).getLineEnd()
-      );
+
+    vimState = await this.run(
+      vimState,
+      position.getLineBegin(),
+      position.getDownByCount(Math.max(0, count - 1)).getLineEnd()
+    );
+
+    if (configuration.autoindent) {
+      if (vimState.editor.document.languageId === 'plaintext') {
+        vimState.recordedState.transformations.push({
+          type: 'insertText',
+          text: thisLineIndent,
+          position: position.getLineBegin(),
+          cursorIndex: this.multicursorIndex,
+        });
+      } else {
+        vimState.recordedState.transformations.push({
+          type: 'reindent',
+          cursorIndex: this.multicursorIndex,
+          diff: new PositionDiff(0, 1), // Handle transition from Normal to Insert modes
+        });
+      }
     }
+
+    return vimState;
   }
 }
 

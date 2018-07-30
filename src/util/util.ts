@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
-
+import * as os from 'os';
+import * as path from 'path';
 import { Position } from '../common/motion/position';
 import { Range } from '../common/motion/range';
 import { logger } from './logger';
+
+const AppDirectory = require('appdirectory');
 
 /**
  * This is certainly quite janky! The problem we're trying to solve
@@ -36,23 +39,9 @@ export async function getCursorsAfterSync(timeout: number = 0): Promise<Range[]>
   );
 }
 
-export async function getExternalExtensionDirPath(): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const os = require('os');
-    const homeDir: string = os.homedir();
-    const path = require('path');
-    const extensionFolder = path.join(homeDir, '.VSCodeVim');
-    const fs = require('fs');
+export function getExtensionDirPath(): string {
+  const dirs = new AppDirectory('VSCodeVim');
+  logger.debug('VSCodeVim Cache Directory: ' + dirs.userCache());
 
-    fs.mkdir(extensionFolder, 0o775, (err: any) => {
-      if (!err || err.code === 'EEXIST') {
-        resolve(extensionFolder);
-      } else {
-        logger.error(
-          `getExternalExtensionDirPath: Failed to retrieve extension path. err=${err}.`
-        );
-        reject(err);
-      }
-    });
-  });
+  return dirs.userCache();
 }

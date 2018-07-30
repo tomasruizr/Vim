@@ -184,13 +184,6 @@ export interface MoveCursorTransformation {
 /**
  * Represents pressing ':'
  */
-export interface ShowCommandLine {
-  type: 'showCommandLine';
-}
-
-/**
- * Represents pressing ':'
- */
 export interface ShowCommandHistory {
   type: 'showCommandHistory';
 }
@@ -207,6 +200,19 @@ export interface Dot {
  */
 export interface Tab {
   type: 'tab';
+  cursorIndex?: number;
+
+  /**
+   * Move the cursor this much.
+   */
+  diff?: PositionDiff;
+}
+
+/**
+ * Represents reindenting the selected line
+ */
+export interface Reindent {
+  type: 'reindent';
   cursorIndex?: number;
 
   /**
@@ -240,13 +246,13 @@ export type Transformation =
   | DeleteTextRangeTransformation
   | DeleteTextTransformation
   | MoveCursorTransformation
-  | ShowCommandLine
   | ShowCommandHistory
   | Dot
   | Macro
   | ContentChangeTransformation
   | DeleteTextTransformation
-  | Tab;
+  | Tab
+  | Reindent;
 
 /**
  * Text Transformations

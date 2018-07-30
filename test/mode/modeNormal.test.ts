@@ -38,27 +38,6 @@ suite('Mode Normal', () => {
   });
 
   newTest({
-    title: 'Can handle %',
-    start: ['|((( )))'],
-    keysPressed: '%',
-    end: ['((( ))|)'],
-  });
-
-  newTest({
-    title: 'Can handle % before opening brace',
-    start: ['|one (two)'],
-    keysPressed: '%',
-    end: ['one (two|)'],
-  });
-
-  newTest({
-    title: 'Can handle % nested inside parens',
-    start: ['(|one { two })'],
-    keysPressed: '%',
-    end: ['(one { two |})'],
-  });
-
-  newTest({
     title: 'Can handle dw',
     start: ['one |two three'],
     keysPressed: 'dw',
@@ -1501,6 +1480,20 @@ suite('Mode Normal', () => {
   });
 
   newTest({
+    title: 'can delete with + motion and count',
+    start: ['one', 'two', 'three', 'fo|ur', 'five', 'six', 'seven'],
+    keysPressed: 'd2+',
+    end: ['one', 'two', 'three', '|seven'],
+  });
+
+  newTest({
+    title: 'can delete with - motion and count',
+    start: ['one', 'two', 'three', 'four', 'five', 's|ix', 'seven'],
+    keysPressed: 'd3-',
+    end: ['one', 'two', '|seven'],
+  });
+
+  newTest({
     title: 'can dE correctly',
     start: ['|one two three'],
     keysPressed: 'dE',
@@ -1840,6 +1833,14 @@ suite('Mode Normal', () => {
   });
 
   newTest({
+    title: 'Resets cursor to indent end with cc',
+    start: ['{', ' | int a;'],
+    keysPressed: 'cc',
+    end: ['{', '  |'],
+    endMode: ModeName.Insert,
+  });
+
+  newTest({
     title: "can handle 'cc' on empty line",
     start: ['foo', '|', 'bar'],
     keysPressed: 'cc',
@@ -1901,10 +1902,10 @@ suite('Mode Normal', () => {
   });
 
   newTest({
-    title: 'cc on whitespace-only line clears line',
+    title: 'cc on whitespace-only treats whitespace as indent',
     start: ['|     '],
     keysPressed: 'cc',
-    end: ['|'],
+    end: ['     |'],
   });
 
   newTest({

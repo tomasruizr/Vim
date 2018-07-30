@@ -12,7 +12,7 @@ export interface IModeSpecificStrings<T> {
 export interface IKeyRemapping {
   before: string[];
   after?: string[];
-  commands?: { command: string; args: any[] }[];
+  commands?: ({ command: string; args: any[] } | string)[];
 }
 
 export interface IDebugConfiguration {
@@ -74,6 +74,11 @@ export interface IConfiguration {
    * Use sneak plugin?
    */
   sneak: boolean;
+
+  /**
+   * Case sensitivity is determined by 'ignorecase' and 'smartcase'
+   */
+  sneakUseIgnorecaseAndSmartcase: boolean;
 
   /**
    * Use surround plugin?
@@ -207,15 +212,17 @@ export interface IConfiguration {
   modeToCursorStyleMap: IModeSpecificStrings<vscode.TextEditorCursorStyle>;
 
   /**
-   * When typing a command show the initial colon ':' character
-   */
-  cmdLineInitialColon: boolean;
-
-  /**
    * Keybindings
    */
   insertModeKeyBindings: IKeyRemapping[];
   insertModeKeyBindingsNonRecursive: IKeyRemapping[];
-  otherModesKeyBindings: IKeyRemapping[];
-  otherModesKeyBindingsNonRecursive: IKeyRemapping[];
+  normalModeKeyBindings: IKeyRemapping[];
+  normalModeKeyBindingsNonRecursive: IKeyRemapping[];
+  visualModeKeyBindings: IKeyRemapping[];
+  visualModeKeyBindingsNonRecursive: IKeyRemapping[];
+
+  /**
+   *  emulate whichwrap
+   */
+  whichwrap: string;
 }

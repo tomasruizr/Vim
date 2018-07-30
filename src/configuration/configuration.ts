@@ -93,8 +93,10 @@ class Configuration implements IConfiguration {
     const keybindingList: IKeyRemapping[][] = [
       this.insertModeKeyBindings,
       this.insertModeKeyBindingsNonRecursive,
-      this.otherModesKeyBindings,
-      this.otherModesKeyBindingsNonRecursive,
+      this.normalModeKeyBindings,
+      this.normalModeKeyBindingsNonRecursive,
+      this.visualModeKeyBindings,
+      this.visualModeKeyBindingsNonRecursive,
     ];
     for (const keybindings of keybindingList) {
       for (let remapping of keybindings) {
@@ -110,6 +112,12 @@ class Configuration implements IConfiguration {
           );
         }
       }
+    }
+
+    this.wrapKeys = {};
+
+    for (const wrapKey of this.whichwrap.split(',')) {
+      this.wrapKeys[wrapKey] = true;
     }
 
     // read package.json for bound keys
@@ -194,6 +202,7 @@ class Configuration implements IConfiguration {
   autoindent = true;
 
   sneak = false;
+  sneakUseIgnorecaseAndSmartcase = false;
 
   surround = true;
 
@@ -299,6 +308,8 @@ class Configuration implements IConfiguration {
   neovimPath = 'nvim';
 
   substituteGlobalFlag = false;
+  whichwrap = '';
+  wrapKeys = {};
 
   private cursorStylePerMode: IModeSpecificStrings<string> = {
     normal: undefined,
@@ -324,13 +335,13 @@ class Configuration implements IConfiguration {
     // nop
   }
 
-  cmdLineInitialColon = false;
-
   // remappings
   insertModeKeyBindings: IKeyRemapping[] = [];
   insertModeKeyBindingsNonRecursive: IKeyRemapping[] = [];
-  otherModesKeyBindings: IKeyRemapping[] = [];
-  otherModesKeyBindingsNonRecursive: IKeyRemapping[] = [];
+  normalModeKeyBindings: IKeyRemapping[] = [];
+  normalModeKeyBindingsNonRecursive: IKeyRemapping[] = [];
+  visualModeKeyBindings: IKeyRemapping[] = [];
+  visualModeKeyBindingsNonRecursive: IKeyRemapping[] = [];
 }
 
 function overlapSetting(args: {

@@ -51,6 +51,10 @@ class CommandSurroundAddTarget extends BaseCommand {
     ['W'],
     ['s'],
     ['p'],
+    ['b'],
+    ['B'],
+    ['r'],
+    ['a'],
   ];
   isCompleteAction = false;
   runsOnceForEveryCursor() {
@@ -64,8 +68,26 @@ class CommandSurroundAddTarget extends BaseCommand {
 
     vimState.surround.target = this.keysPressed[this.keysPressed.length - 1];
 
+    if (vimState.surround.target === 'b') {
+      vimState.surround.target = ')';
+    }
+
+    if (vimState.surround.target === 'B') {
+      vimState.surround.target = '}';
+    }
+
+    if (vimState.surround.target === 'r') {
+      vimState.surround.target = ']';
+    }
+
+    if (vimState.surround.target === 'a') {
+      vimState.surround.target = '>';
+    }
+
     // It's possible we're already done, e.g. dst
-    await CommandSurroundAddToReplacement.TryToExecuteSurround(vimState, position);
+    if (await CommandSurroundAddToReplacement.TryToExecuteSurround(vimState, position)) {
+      this.isCompleteAction = true;
+    }
 
     return vimState;
   }
@@ -306,7 +328,9 @@ export class CommandSurroundAddToReplacement extends BaseCommand {
 
     vimState.surround.replacement += stringToAdd;
 
-    await CommandSurroundAddToReplacement.TryToExecuteSurround(vimState, position);
+    if (await CommandSurroundAddToReplacement.TryToExecuteSurround(vimState, position)) {
+      this.isCompleteAction = true;
+    }
 
     return vimState;
   }
@@ -327,7 +351,7 @@ export class CommandSurroundAddToReplacement extends BaseCommand {
       vimState.recordedState.surroundKeys.push(vimState.keyHistory[i]);
     }
 
-    return false;
+    return true;
   }
 
   // we assume that we start directly on the characters we're operating over
@@ -385,7 +409,7 @@ export class CommandSurroundAddToReplacement extends BaseCommand {
     let endReplace = replacement;
 
     if (startReplace[0] === '<') {
-      let tagName = /([-\w]+)/.exec(startReplace);
+      let tagName = /([-\w.]+)/.exec(startReplace);
       if (tagName) {
         endReplace = `</${tagName[1]}>`;
       } else {

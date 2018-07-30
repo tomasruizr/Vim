@@ -13,6 +13,7 @@ import { CursorMoveByUnit, CursorMovePosition, TextEditor } from './../textEdito
 import { BaseAction } from './base';
 import { RegisterAction } from './base';
 import { ChangeOperator, DeleteOperator, YankOperator } from './operator';
+import { shouldWrapKey } from './wrapping';
 
 export function isIMovement(o: IMovement | Position): o is IMovement {
   return (o as IMovement).start !== undefined && (o as IMovement).stop !== undefined;
@@ -45,8 +46,6 @@ export abstract class BaseMovement extends BaseAction {
   modes = [ModeName.Normal, ModeName.Visual, ModeName.VisualLine, ModeName.VisualBlock];
 
   isMotion = true;
-
-  canBePrefixedWithCount = false;
 
   /**
    * If movement can be repeated with semicolon or comma this will be true when
@@ -262,25 +261,33 @@ class MoveDownFoldFix extends MoveByScreenLineMaintainDesiredColumn {
   value = 1;
 
   public async execAction(position: Position, vimState: VimState): Promise<Position | IMovement> {
-    if (position.line === TextEditor.getLineCount() - 1) {
+    if (position.line >= TextEditor.getLineCount() - 1) {
       return position;
     }
-    let t: Position;
-    let count = 0;
+    let t: Position | IMovement;
+    let prevLine: number = position.line;
+    let prevChar: number = position.character;
     const prevDesiredColumn = vimState.desiredColumn;
+    const moveDownByScreenLine = new MoveDownByScreenLine();
     do {
-      t = <Position>await new MoveDownByScreenLine().execAction(position, vimState);
-      count += 1;
+      t = <Position | IMovement>await moveDownByScreenLine.execAction(position, vimState);
+      t = t instanceof Position ? t : t.stop;
+      const lineChanged = prevLine !== t.line;
+      // wrappedLine movement goes to eol character only when at the last line
+      // thus a column change on wrappedLine movement represents a visual last line
+      const colChanged = prevChar !== t.character;
+      if (lineChanged || !colChanged) {
+        break;
+      }
+      prevChar = t.character;
+      prevLine = t.line;
     } while (t.line === position.line);
-    if (t.line > position.line + 1) {
-      return t;
+    // fix column change at last line caused by wrappedLine movement
+    // causes cursor lag and flicker if a large repeat prefix is given to movement
+    if (t.character !== prevDesiredColumn) {
+      t = new Position(t.line, prevDesiredColumn);
     }
-    while (count > 0) {
-      t = <Position>await new MoveUpByScreenLine().execAction(position, vimState);
-      count--;
-    }
-    vimState.desiredColumn = prevDesiredColumn;
-    return await position.getDown(vimState.desiredColumn);
+    return t;
   }
 }
 
@@ -341,26 +348,19 @@ class MoveUpFoldFix extends MoveByScreenLineMaintainDesiredColumn {
     if (position.line === 0) {
       return position;
     }
-    let t: Position;
+    let t: Position | IMovement;
     const prevDesiredColumn = vimState.desiredColumn;
-    let count = 0;
-
+    const moveUpByScreenLine = new MoveUpByScreenLine();
     do {
-      t = <Position>(
-        await new MoveUpByScreenLineMaintainDesiredColumn().execAction(position, vimState)
-      );
-      count += 1;
+      t = <Position | IMovement>await moveUpByScreenLine.execAction(position, vimState);
+      t = t instanceof Position ? t : t.stop;
     } while (t.line === position.line);
-    vimState.desiredColumn = prevDesiredColumn;
-    if (t.line < position.line - 1) {
-      return t;
+    // fix column change at last line caused by wrappedLine movement
+    // causes cursor lag and flicker if a large repeat prefix is given to movement
+    if (t.character !== prevDesiredColumn) {
+      t = new Position(t.line, prevDesiredColumn);
     }
-    while (count > 0) {
-      t = <Position>await new MoveDownByScreenLine().execAction(position, vimState);
-      count--;
-    }
-    vimState.desiredColumn = prevDesiredColumn;
-    return await position.getUp(vimState.desiredColumn);
+    return t;
   }
 }
 
@@ -431,13 +431,13 @@ class CommandNextSearchMatch extends BaseMovement {
     // Turn one of the highlighting flags back on (turned off with :nohl)
     vimState.globalState.hl = true;
 
-    if (vimState.cursorPosition.getRight().isEqual(vimState.cursorPosition.getLineEnd())) {
-      return searchState.getNextSearchMatchPosition(vimState.cursorPosition.getRight()).pos;
+    if (position.getRight().isEqual(position.getLineEnd())) {
+      return searchState.getNextSearchMatchPosition(position.getRight()).pos;
     }
 
     // Turn one of the highlighting flags back on (turned off with :nohl)
 
-    return searchState.getNextSearchMatchPosition(vimState.cursorPosition).pos;
+    return searchState.getNextSearchMatchPosition(position).pos;
   }
 }
 
@@ -455,7 +455,7 @@ class CommandPreviousSearchMatch extends BaseMovement {
     // Turn one of the highlighting flags back on (turned off with :nohl)
     vimState.globalState.hl = true;
 
-    return searchState.getNextSearchMatchPosition(vimState.cursorPosition, -1).pos;
+    return searchState.getNextSearchMatchPosition(position, -1).pos;
   }
 }
 
@@ -484,12 +484,14 @@ export class MarkMovement extends BaseMovement {
     return mark.position;
   }
 }
-
 @RegisterAction
 export class MoveLeft extends BaseMovement {
   keys = ['h'];
 
   public async execAction(position: Position, vimState: VimState): Promise<Position> {
+    if (shouldWrapKey(vimState, this.keysPressed)) {
+      return position.getLeftThroughLineBreaks();
+    }
     return position.getLeft();
   }
 }
@@ -515,7 +517,11 @@ class MoveRight extends BaseMovement {
   keys = ['l'];
 
   public async execAction(position: Position, vimState: VimState): Promise<Position> {
-    return new Position(position.line, position.character + 1);
+    if (shouldWrapKey(vimState, this.keysPressed)) {
+      const includeEol = vimState.currentMode === ModeName.Insert;
+      return position.getRightThroughLineBreaks(includeEol);
+    }
+    return position.getRight();
   }
 }
 
@@ -543,6 +549,7 @@ class MoveDownNonBlank extends BaseMovement {
     vimState: VimState,
     count: number
   ): Promise<Position | IMovement> {
+    vimState.currentRegisterMode = RegisterMode.LineWise;
     return position.getDownByCount(Math.max(count, 1)).getFirstLineNonBlankChar();
   }
 }
@@ -556,6 +563,7 @@ class MoveUpNonBlank extends BaseMovement {
     vimState: VimState,
     count: number
   ): Promise<Position | IMovement> {
+    vimState.currentRegisterMode = RegisterMode.LineWise;
     return position.getUpByCount(Math.max(count, 1)).getFirstLineNonBlankChar();
   }
 }
@@ -807,7 +815,6 @@ class MoveScreenLineEnd extends MoveByScreenLine {
 class MoveScreenLineEndNonBlank extends MoveByScreenLine {
   keys = ['g', '_'];
   movementType: CursorMovePosition = 'wrappedLineLastNonWhitespaceCharacter';
-  canBePrefixedWithCount = true;
 
   public async execActionWithCount(
     position: Position,
@@ -978,7 +985,6 @@ class MoveToLineFromViewPortTop extends MoveByScreenLine {
   movementType: CursorMovePosition = 'viewPortTop';
   by: CursorMoveByUnit = 'line';
   value = 1;
-  canBePrefixedWithCount = true;
 
   public async execActionWithCount(
     position: Position,
@@ -996,7 +1002,6 @@ class MoveToLineFromViewPortBottom extends MoveByScreenLine {
   movementType: CursorMovePosition = 'viewPortBottom';
   by: CursorMoveByUnit = 'line';
   value = 1;
-  canBePrefixedWithCount = true;
 
   public async execActionWithCount(
     position: Position,
@@ -1874,7 +1879,6 @@ export class MoveAroundTag extends MoveTagMatch {
 export class ArrowsInInsertMode extends BaseMovement {
   modes = [ModeName.Insert];
   keys: string[];
-  canBePrefixedWithCount = true;
 
   public async execAction(position: Position, vimState: VimState): Promise<Position> {
     // we are in Insert Mode and arrow keys will clear all other actions except the first action, which enters Insert Mode.
@@ -1893,10 +1897,10 @@ export class ArrowsInInsertMode extends BaseMovement {
         newPosition = <Position>await new MoveDownArrow().execAction(position, vimState);
         break;
       case '<left>':
-        newPosition = await new MoveLeftArrow().execAction(position, vimState);
+        newPosition = await new MoveLeftArrow(this.keysPressed).execAction(position, vimState);
         break;
       case '<right>':
-        newPosition = await new MoveRightArrow().execAction(position, vimState);
+        newPosition = await new MoveRightArrow(this.keysPressed).execAction(position, vimState);
         break;
       default:
         break;

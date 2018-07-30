@@ -9,6 +9,7 @@ import { TextEditor } from '../textEditor';
 import { Position } from './../common/motion/position';
 import { VimState } from './../state/vimState';
 import { logger } from '../util/logger';
+import { StatusBar } from '../statusBar';
 
 export class Neovim implements vscode.Disposable {
   private process: ChildProcess;
@@ -34,11 +35,37 @@ export class Neovim implements vscode.Disposable {
     command = ':' + command + '\n';
     command = command.replace('<', '<lt>');
 
+    // Clear the previous error and status messages. API does not allow setVvar
+    // so do it manually
+    await this.nvim.command('let v:errmsg="" | let v:statusmsg=""');
+
+    // Execute the command
     await this.nvim.input(command);
     if ((await this.nvim.getMode()).blocking) {
       await this.nvim.input('<esc>');
     }
+
+    // Check if an error occurred
+    const errMsg = await this.nvim.getVvar('errmsg');
+    let statusBarText = '';
+    if (errMsg && errMsg.toString() !== '') {
+      statusBarText = errMsg.toString();
+    } else {
+      // Check to see if a status message was updated
+      const statusMsg = await this.nvim.getVvar('statusmsg');
+      if (statusMsg && statusMsg.toString() !== '') {
+        statusBarText = statusMsg.toString();
+      }
+    }
+
+    // TODO xconverge: only do this if a command was successful, but be mindful
+    // of indentation changes that were made
+
+    // Sync buffer back to vscode
     await this.syncVimToVs(vimState);
+
+    // Lastly update the status bar
+    StatusBar.SetText(statusBarText, vimState.currentMode, vimState.isRecordingMacro, true, true);
 
     return;
   }

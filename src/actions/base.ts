@@ -1,98 +1,7 @@
 import { configuration } from './../configuration/configuration';
 import { ModeName } from './../mode/mode';
 import { VimState } from './../state/vimState';
-
-const is2DArray = function<T>(x: any): x is T[][] {
-  return Array.isArray(x[0]);
-};
-
-export let compareKeypressSequence = function(one: string[] | string[][], two: string[]): boolean {
-  if (is2DArray(one)) {
-    for (const sequence of one) {
-      if (compareKeypressSequence(sequence, two)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  if (one.length !== two.length) {
-    return false;
-  }
-
-  const isSingleNumber = (s: string): boolean => {
-    return s.length === 1 && '1234567890'.indexOf(s) > -1;
-  };
-
-  const containsControlKey = (s: string): boolean => {
-    // We count anything starting with < (e.g. <c-u>) as a control key, but we
-    // exclude the first 3 because it's more convenient to do so.
-
-    return (
-      s.toUpperCase() !== '<BS>' &&
-      s.toUpperCase() !== '<SHIFT+BS>' &&
-      s.toUpperCase() !== '<TAB>' &&
-      s.startsWith('<') &&
-      s.length > 1
-    );
-  };
-
-  const singleAlpha: RegExp = /^[a-zA-Z]$/;
-
-  for (let i = 0, j = 0; i < one.length; i++, j++) {
-    const left = one[i],
-      right = two[j];
-
-    if (left === '<any>') {
-      continue;
-    }
-    if (right === '<any>') {
-      continue;
-    }
-
-    if (left === '<number>' && isSingleNumber(right)) {
-      continue;
-    }
-    if (right === '<number>' && isSingleNumber(left)) {
-      continue;
-    }
-
-    if (left === '<alpha>' && singleAlpha.test(right)) {
-      continue;
-    }
-    if (right === '<alpha>' && singleAlpha.test(left)) {
-      continue;
-    }
-
-    if (left === '<character>' && !containsControlKey(right)) {
-      continue;
-    }
-    if (right === '<character>' && !containsControlKey(left)) {
-      continue;
-    }
-
-    if (left === '<leader>' && right === configuration.leader) {
-      continue;
-    }
-    if (right === '<leader>' && left === configuration.leader) {
-      continue;
-    }
-
-    if (left === configuration.leader) {
-      return false;
-    }
-    if (right === configuration.leader) {
-      return false;
-    }
-
-    if (left !== right) {
-      return false;
-    }
-  }
-
-  return true;
-};
+import { Notation } from '../configuration/notation';
 
 export class BaseAction {
   /**
@@ -129,12 +38,14 @@ export class BaseAction {
     if (this.modes.indexOf(vimState.currentMode) === -1) {
       return false;
     }
-    if (!compareKeypressSequence(this.keys, keysPressed)) {
+
+    if (!BaseAction.CompareKeypressSequence(this.keys, keysPressed)) {
       return false;
     }
+
     if (
       this.mustBeFirstKey &&
-      vimState.recordedState.numberOfKeysInCommandWithoutCountPrefix - keysPressed.length > 0
+      vimState.recordedState.commandWithoutCountPrefix.length - keysPressed.length > 0
     ) {
       return false;
     }
@@ -150,15 +61,15 @@ export class BaseAction {
       return false;
     }
 
-    const keys2D = is2DArray(this.keys) ? this.keys : [this.keys];
+    const keys2D = BaseAction.is2DArray(this.keys) ? this.keys : [this.keys];
     const keysSlice = keys2D.map(x => x.slice(0, keysPressed.length));
-    if (!compareKeypressSequence(keysSlice, keysPressed)) {
+    if (!BaseAction.CompareKeypressSequence(keysSlice, keysPressed)) {
       return false;
     }
 
     if (
       this.mustBeFirstKey &&
-      vimState.recordedState.numberOfKeysInCommandWithoutCountPrefix - keysPressed.length > 0
+      vimState.recordedState.commandWithoutCountPrefix.length - keysPressed.length > 0
     ) {
       return false;
     }
@@ -166,8 +77,84 @@ export class BaseAction {
     return true;
   }
 
+  public static CompareKeypressSequence(one: string[] | string[][], two: string[]): boolean {
+    if (BaseAction.is2DArray(one)) {
+      for (const sequence of one) {
+        if (BaseAction.CompareKeypressSequence(sequence, two)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    if (one.length !== two.length) {
+      return false;
+    }
+
+    const isSingleNumber: RegExp = /^[0-9]$/;
+    const isSingleAlpha: RegExp = /^[a-zA-Z]$/;
+
+    for (let i = 0, j = 0; i < one.length; i++, j++) {
+      const left = one[i],
+        right = two[j];
+
+      if (left === '<any>') {
+        continue;
+      }
+      if (right === '<any>') {
+        continue;
+      }
+
+      if (left === '<number>' && isSingleNumber.test(right)) {
+        continue;
+      }
+      if (right === '<number>' && isSingleNumber.test(left)) {
+        continue;
+      }
+
+      if (left === '<alpha>' && isSingleAlpha.test(right)) {
+        continue;
+      }
+      if (right === '<alpha>' && isSingleAlpha.test(left)) {
+        continue;
+      }
+
+      if (left === '<character>' && !Notation.IsControlKey(right)) {
+        continue;
+      }
+      if (right === '<character>' && !Notation.IsControlKey(left)) {
+        continue;
+      }
+
+      if (left === '<leader>' && right === configuration.leader) {
+        continue;
+      }
+      if (right === '<leader>' && left === configuration.leader) {
+        continue;
+      }
+
+      if (left === configuration.leader) {
+        return false;
+      }
+      if (right === configuration.leader) {
+        return false;
+      }
+
+      if (left !== right) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   public toString(): string {
     return this.keys.join('');
+  }
+
+  private static is2DArray<T>(x: any): x is T[][] {
+    return Array.isArray(x[0]);
   }
 }
 
@@ -180,8 +167,7 @@ export class Actions {
   /**
    * Every Vim action will be added here with the @RegisterAction decorator.
    */
-  public static allActions: { type: typeof BaseAction; action: BaseAction }[] = [];
-
+  public static actionMap = new Map<ModeName, typeof BaseAction[]>();
   /**
    * Gets the action that should be triggered given a key
    * sequence.
@@ -199,18 +185,12 @@ export class Actions {
   ): BaseAction | KeypressState {
     let isPotentialMatch = false;
 
-    for (const thing of Actions.allActions) {
-      const { type, action } = thing!;
-
-      if (action.keys === undefined) {
-        // action that can't be called directly
-        continue;
-      }
-
+    var possibleActionsForMode = Actions.actionMap.get(vimState.currentMode) || [];
+    for (const actionType of possibleActionsForMode) {
+      const action = new actionType();
       if (action.doesActionApply(vimState, keysPressed)) {
-        const result = new type();
-        result.keysPressed = vimState.recordedState.actionKeys.slice(0);
-        return result;
+        action.keysPressed = vimState.recordedState.actionKeys.slice(0);
+        return action;
       }
 
       if (action.couldActionApply(vimState, keysPressed)) {
@@ -223,5 +203,19 @@ export class Actions {
 }
 
 export function RegisterAction(action: typeof BaseAction): void {
-  Actions.allActions.push({ type: action, action: new action() });
+  const actionInstance = new action();
+  for (const modeName of actionInstance.modes) {
+    var actions = Actions.actionMap.get(modeName);
+    if (!actions) {
+      actions = [];
+      Actions.actionMap.set(modeName, actions);
+    }
+
+    if (actionInstance.keys === undefined) {
+      // action that can't be called directly
+      continue;
+    }
+
+    actions.push(action);
+  }
 }

@@ -71,6 +71,23 @@ export class SearchInProgressMode extends Mode {
   }
 }
 
+export class CommandlineInProgress extends Mode {
+  constructor() {
+    super(ModeName.CommandlineInProgress, '', VSCodeVimCursorType.Block);
+  }
+
+  getStatusBarText(vimState: VimState): string {
+    let stringWithCursor = vimState.currentCommandlineText.split('');
+    stringWithCursor.splice(vimState.statusBarCursorCharacterPos, 0, '|');
+
+    return `:${stringWithCursor.join('')}`;
+  }
+
+  getStatusBarCommandText(vimState: VimState): string {
+    return '';
+  }
+}
+
 export class ReplaceMode extends Mode {
   constructor() {
     super(ModeName.Replace, '-- Replace --', VSCodeVimCursorType.Underline);

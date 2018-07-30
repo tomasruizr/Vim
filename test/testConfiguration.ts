@@ -12,6 +12,7 @@ export class Configuration implements IConfiguration {
   smartcase = true;
   autoindent = true;
   sneak = false;
+  sneakUseIgnorecaseAndSmartcase = false;
   surround = true;
   easymotion = false;
   easymotionMarkerBackgroundColor = '';
@@ -41,7 +42,7 @@ export class Configuration implements IConfiguration {
     replace: '#000000';
   };
   debug: {
-    loggingLevel: 'info';
+    loggingLevel: 'warn';
   };
   searchHighlightColor = 'rgba(150, 150, 255, 0.3)';
   tabstop = 2;
@@ -65,9 +66,12 @@ export class Configuration implements IConfiguration {
     visualblock: vscode.TextEditorCursorStyle.Line,
     replace: vscode.TextEditorCursorStyle.Line,
   };
-  cmdLineInitialColon = false;
   insertModeKeyBindings: IKeyRemapping[] = [];
   insertModeKeyBindingsNonRecursive: IKeyRemapping[] = [];
-  otherModesKeyBindings: IKeyRemapping[] = [];
-  otherModesKeyBindingsNonRecursive: IKeyRemapping[] = [];
+  normalModeKeyBindings: IKeyRemapping[] = [];
+  normalModeKeyBindingsNonRecursive: IKeyRemapping[] = [];
+  visualModeKeyBindings: IKeyRemapping[] = [];
+  visualModeKeyBindingsNonRecursive: IKeyRemapping[] = [];
+  whichwrap = '';
+  wrapKeys = {};
 }

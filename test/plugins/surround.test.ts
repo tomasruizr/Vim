@@ -1,15 +1,11 @@
-import { getAndUpdateModeHandler } from '../../extension';
-import { ModeHandler } from '../../src/mode/modeHandler';
 import { getTestingFunctions } from '../testSimplifier';
 import { cleanUpWorkspace, setupWorkspace } from './../testUtils';
 
 suite('surround plugin', () => {
-  let modeHandler: ModeHandler;
   let { newTest, newTestOnly } = getTestingFunctions();
 
   setup(async () => {
     await setupWorkspace(undefined, '.js');
-    modeHandler = await getAndUpdateModeHandler();
   });
 
   teardown(cleanUpWorkspace);
@@ -77,6 +73,13 @@ suite('surround plugin', () => {
   });
 
   newTest({
+    title: "'cst<' surrounds word with tags that have a dot in them",
+    start: ['first <test>li|ne</test> test'],
+    keysPressed: 'cst<abc.def>',
+    end: ['first <abc.def>li|ne</abc.def> test'],
+  });
+
+  newTest({
     title: "'yss)' surrounds entire line respecting whitespace",
     start: ['foo', '    foob|ar  '],
     keysPressed: 'yss)',
@@ -91,6 +94,13 @@ suite('surround plugin', () => {
   });
 
   newTest({
+    title: 'change surround with alias',
+    start: ['first (li|ne) test'],
+    keysPressed: 'csb]',
+    end: ['first [li|ne] test'],
+  });
+
+  newTest({
     title: 'change surround to tags',
     start: ['first [li|ne] test'],
     keysPressed: 'cs]tabc>',
@@ -101,6 +111,13 @@ suite('surround plugin', () => {
     title: 'delete surround',
     start: ["first 'li|ne' test"],
     keysPressed: "ds'",
+    end: ['first li|ne test'],
+  });
+
+  newTest({
+    title: 'delete surround with alias',
+    start: ['first {li|ne} test'],
+    keysPressed: 'dsB',
     end: ['first li|ne test'],
   });
 

@@ -1,11 +1,11 @@
 import * as fs from 'fs';
-import * as path from 'path';
-import * as vscode from 'vscode';
-
-import { VimState } from '../../state/vimState';
-import { StatusBar } from '../../statusBar';
-import { Message } from '../../util/message';
 import * as node from '../node';
+import * as path from 'path';
+import * as util from 'util';
+import * as vscode from 'vscode';
+import { Logger } from '../../util/logger';
+import { StatusBar } from '../../statusBar';
+import { VimState } from '../../state/vimState';
 
 export interface IWriteCommandArguments extends node.ICommandArgs {
   opt?: string;
@@ -23,6 +23,7 @@ export interface IWriteCommandArguments extends node.ICommandArgs {
 //
 export class WriteCommand extends node.CommandBase {
   protected _arguments: IWriteCommandArguments;
+  private readonly _logger = Logger.get('Write');
 
   constructor(args: IWriteCommandArguments) {
     super();
@@ -36,26 +37,27 @@ export class WriteCommand extends node.CommandBase {
 
   async execute(vimState: VimState): Promise<void> {
     if (this.arguments.opt) {
-      Message.ShowError('Not implemented.');
+      this._logger.warn('not implemented');
       return;
     } else if (this.arguments.file) {
-      Message.ShowError('Not implemented.');
+      this._logger.warn('not implemented');
       return;
     } else if (this.arguments.append) {
-      Message.ShowError('Not implemented.');
+      this._logger.warn('not implemented');
       return;
     } else if (this.arguments.cmd) {
-      Message.ShowError('Not implemented.');
+      this._logger.warn('not implemented');
       return;
     }
 
-    if (vimState.editor.document.isUntitled) {
-      await vscode.commands.executeCommand('workbench.action.files.save');
+    // defer saving the file to vscode if file is new (to present file explorer) or if file is a remote file
+    if (vimState.editor.document.isUntitled || vimState.editor.document.uri.scheme !== 'file') {
+      vscode.commands.executeCommand('workbench.action.files.save');
       return;
     }
 
     try {
-      fs.accessSync(vimState.editor.document.fileName, fs.constants.W_OK);
+      await util.promisify(fs.access)(vimState.editor.document.fileName, fs.constants.W_OK);
       return this.save(vimState);
     } catch (accessErr) {
       if (this.arguments.bang) {
@@ -63,17 +65,11 @@ export class WriteCommand extends node.CommandBase {
           if (!e) {
             return this.save(vimState);
           }
-          StatusBar.SetText(e.message, vimState.currentMode, vimState.isRecordingMacro, true, true);
+          StatusBar.Set(e.message, vimState.currentMode, vimState.isRecordingMacro, true);
           return;
         });
       } else {
-        StatusBar.SetText(
-          accessErr.message,
-          vimState.currentMode,
-          vimState.isRecordingMacro,
-          true,
-          true
-        );
+        StatusBar.Set(accessErr.message, vimState.currentMode, vimState.isRecordingMacro, true);
       }
     }
   }
@@ -89,9 +85,9 @@ export class WriteCommand extends node.CommandBase {
           'L ' +
           vimState.editor.document.getText().length +
           'C written';
-        StatusBar.SetText(text, vimState.currentMode, vimState.isRecordingMacro, true, true);
+        StatusBar.Set(text, vimState.currentMode, vimState.isRecordingMacro, true);
       },
-      e => StatusBar.SetText(e, vimState.currentMode, vimState.isRecordingMacro, true, true)
+      e => StatusBar.Set(e, vimState.currentMode, vimState.isRecordingMacro, true)
     );
   }
 }

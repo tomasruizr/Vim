@@ -13,6 +13,9 @@ import {
   MoveAParentheses,
   MoveASingleQuotes,
   MoveASquareBracket,
+  MoveABacktick,
+  MoveAroundTag,
+  ExpandingSelection,
 } from './motion';
 import { ChangeOperator } from './operator';
 
@@ -37,7 +40,7 @@ export class SelectWord extends TextObjectMovement {
   public async execAction(position: Position, vimState: VimState): Promise<IMovement> {
     let start: Position;
     let stop: Position;
-    const currentChar = TextEditor.getLineAt(position).text[position.character];
+    const currentChar = TextEditor.getCharAt(position);
 
     if (/\s/.test(currentChar)) {
       start = position.getLastWordEnd().getRight();
@@ -68,11 +71,11 @@ export class SelectWord extends TextObjectMovement {
 
     if (
       vimState.currentMode === ModeName.Visual &&
-      !vimState.cursorPosition.isEqual(vimState.cursorStartPosition)
+      !vimState.cursorStopPosition.isEqual(vimState.cursorStartPosition)
     ) {
       start = vimState.cursorStartPosition;
 
-      if (vimState.cursorPosition.isBefore(vimState.cursorStartPosition)) {
+      if (vimState.cursorStopPosition.isBefore(vimState.cursorStartPosition)) {
         // If current cursor postion is before cursor start position, we are selecting words in reverser order.
         if (/\s/.test(currentChar)) {
           stop = position.getWordLeft(true);
@@ -128,11 +131,11 @@ export class SelectABigWord extends TextObjectMovement {
     }
     if (
       vimState.currentMode === ModeName.Visual &&
-      !vimState.cursorPosition.isEqual(vimState.cursorStartPosition)
+      !vimState.cursorStopPosition.isEqual(vimState.cursorStartPosition)
     ) {
       start = vimState.cursorStartPosition;
 
-      if (vimState.cursorPosition.isBefore(vimState.cursorStartPosition)) {
+      if (vimState.cursorStopPosition.isBefore(vimState.cursorStartPosition)) {
         // If current cursor postion is before cursor start position, we are selecting words in reverser order.
         if (/\s/.test(currentChar)) {
           stop = position.getBigWordLeft();
@@ -152,26 +155,48 @@ export class SelectABigWord extends TextObjectMovement {
 /**
  * This is a custom action that I (johnfn) added. It selects procedurally
  * larger blocks. e.g. if you had "blah (foo [bar 'ba|z'])" then it would
- * select 'baz' first. If you pressed az again, it'd then select [bar 'baz'],
+ * select 'baz' first. If you pressed af again, it'd then select [bar 'baz'],
  * and if you did it a third time it would select "(foo [bar 'baz'])".
  */
 @RegisterAction
-export class SelectAnExpandingBlock extends TextObjectMovement {
+export class SelectAnExpandingBlock extends ExpandingSelection {
   keys = ['a', 'f'];
   modes = [ModeName.Visual, ModeName.VisualLine];
 
   public async execAction(position: Position, vimState: VimState): Promise<IMovement> {
-    const ranges = [
-      await new MoveASingleQuotes().execAction(position, vimState),
-      await new MoveADoubleQuotes().execAction(position, vimState),
-      await new MoveAClosingCurlyBrace().execAction(position, vimState),
-      await new MoveAParentheses().execAction(position, vimState),
-      await new MoveASquareBracket().execAction(position, vimState),
+    const blocks = [
+      new MoveADoubleQuotes(),
+      new MoveASingleQuotes(),
+      new MoveABacktick(),
+      new MoveAClosingCurlyBrace(),
+      new MoveAParentheses(),
+      new MoveASquareBracket(),
+      new MoveAroundTag(),
     ];
+    // ideally no state would change as we test each of the possible expansions
+    // a deep copy of vimState could work here but may be expensive
+    let ranges: IMovement[] = [];
+    for (const block of blocks) {
+      const cursorPos = new Position(position.line, position.character);
+      const cursorStartPos = new Position(
+        vimState.cursorStartPosition.line,
+        vimState.cursorStartPosition.character
+      );
+      ranges.push(await block.execAction(cursorPos, vimState));
+      vimState.cursorStartPosition = cursorStartPos;
+    }
+
+    ranges = ranges.filter(range => {
+      return !range.failed;
+    });
 
     let smallestRange: Range | undefined = undefined;
 
     for (const iMotion of ranges) {
+      const currentSelectedRange = new Range(
+        vimState.cursorStartPosition,
+        vimState.cursorStopPosition
+      );
       if (iMotion.failed) {
         continue;
       }
@@ -179,33 +204,47 @@ export class SelectAnExpandingBlock extends TextObjectMovement {
       const range = Range.FromIMovement(iMotion);
       let contender: Range | undefined = undefined;
 
-      if (!smallestRange) {
-        contender = range;
-      } else {
-        if (range.start.isAfter(smallestRange.start) && range.stop.isBefore(smallestRange.stop)) {
+      if (
+        range.start.isBefore(currentSelectedRange.start) &&
+        range.stop.isAfter(currentSelectedRange.stop)
+      ) {
+        if (!smallestRange) {
           contender = range;
+        } else {
+          if (range.start.isAfter(smallestRange.start) && range.stop.isBefore(smallestRange.stop)) {
+            contender = range;
+          }
         }
       }
 
       if (contender) {
         const areTheyEqual =
-          contender.equals(new Range(vimState.cursorStartPosition, vimState.cursorPosition)) ||
+          contender.equals(new Range(vimState.cursorStartPosition, vimState.cursorStopPosition)) ||
           (vimState.currentMode === ModeName.VisualLine &&
             contender.start.line === vimState.cursorStartPosition.line &&
-            contender.stop.line === vimState.cursorPosition.line);
+            contender.stop.line === vimState.cursorStopPosition.line);
 
         if (!areTheyEqual) {
           smallestRange = contender;
         }
       }
     }
-
     if (!smallestRange) {
       return {
         start: vimState.cursorStartPosition,
-        stop: vimState.cursorPosition,
+        stop: vimState.cursorStopPosition,
       };
     } else {
+      // revert relevant state changes
+      vimState.cursorStartPosition = new Position(
+        smallestRange.start.line,
+        smallestRange.start.character
+      );
+      vimState.cursorStopPosition = new Position(
+        smallestRange.stop.line,
+        smallestRange.stop.character
+      );
+      vimState.recordedState.operatorPositionDiff = undefined;
       return {
         start: smallestRange.start,
         stop: smallestRange.stop,
@@ -234,11 +273,11 @@ export class SelectInnerWord extends TextObjectMovement {
 
     if (
       vimState.currentMode === ModeName.Visual &&
-      !vimState.cursorPosition.isEqual(vimState.cursorStartPosition)
+      !vimState.cursorStopPosition.isEqual(vimState.cursorStartPosition)
     ) {
       start = vimState.cursorStartPosition;
 
-      if (vimState.cursorPosition.isBefore(vimState.cursorStartPosition)) {
+      if (vimState.cursorStopPosition.isBefore(vimState.cursorStartPosition)) {
         // If current cursor postion is before cursor start position, we are selecting words in reverser order.
         if (/\s/.test(currentChar)) {
           stop = position.getLastWordEnd().getRight();
@@ -275,11 +314,11 @@ export class SelectInnerBigWord extends TextObjectMovement {
 
     if (
       vimState.currentMode === ModeName.Visual &&
-      !vimState.cursorPosition.isEqual(vimState.cursorStartPosition)
+      !vimState.cursorStopPosition.isEqual(vimState.cursorStartPosition)
     ) {
       start = vimState.cursorStartPosition;
 
-      if (vimState.cursorPosition.isBefore(vimState.cursorStartPosition)) {
+      if (vimState.cursorStopPosition.isBefore(vimState.cursorStartPosition)) {
         // If current cursor postion is before cursor start position, we are selecting words in reverser order.
         if (/\s/.test(currentChar)) {
           stop = position.getLastBigWordEnd().getRight();
@@ -329,13 +368,13 @@ export class SelectSentence extends TextObjectMovement {
 
     if (
       vimState.currentMode === ModeName.Visual &&
-      !vimState.cursorPosition.isEqual(vimState.cursorStartPosition)
+      !vimState.cursorStopPosition.isEqual(vimState.cursorStartPosition)
     ) {
       start = vimState.cursorStartPosition;
 
-      if (vimState.cursorPosition.isBefore(vimState.cursorStartPosition)) {
+      if (vimState.cursorStopPosition.isBefore(vimState.cursorStartPosition)) {
         // If current cursor postion is before cursor start position, we are selecting sentences in reverser order.
-        if (currentSentenceNonWhitespaceEnd.isAfter(vimState.cursorPosition)) {
+        if (currentSentenceNonWhitespaceEnd.isAfter(vimState.cursorStopPosition)) {
           stop = currentSentenceBegin
             .getSentenceBegin({ forward: false })
             .getCurrentSentenceEnd()
@@ -375,13 +414,13 @@ export class SelectInnerSentence extends TextObjectMovement {
 
     if (
       vimState.currentMode === ModeName.Visual &&
-      !vimState.cursorPosition.isEqual(vimState.cursorStartPosition)
+      !vimState.cursorStopPosition.isEqual(vimState.cursorStartPosition)
     ) {
       start = vimState.cursorStartPosition;
 
-      if (vimState.cursorPosition.isBefore(vimState.cursorStartPosition)) {
+      if (vimState.cursorStopPosition.isBefore(vimState.cursorStartPosition)) {
         // If current cursor postion is before cursor start position, we are selecting sentences in reverser order.
-        if (currentSentenceNonWhitespaceEnd.isAfter(vimState.cursorPosition)) {
+        if (currentSentenceNonWhitespaceEnd.isAfter(vimState.cursorStopPosition)) {
           stop = currentSentenceBegin;
         } else {
           stop = currentSentenceNonWhitespaceEnd.getRight();
@@ -541,7 +580,7 @@ abstract class IndentObjectMatch extends TextObjectMovement {
   }
 
   public async execActionForOperator(position: Position, vimState: VimState): Promise<IMovement> {
-    return await this.execAction(position, vimState);
+    return this.execAction(position, vimState);
   }
 
   /**

@@ -1,3 +1,618 @@
+## [v1.0.0](https://github.com/vscodevim/vim/tree/v1.0.0) (2019-01-05)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.17.3...v1.0.0)
+
+The first commit to this project was a little over 3 years ago, and what a journey it's been. To celebrate the new year, we are pushing out v1.0.0 of VSCodeVim! In addition to this project reaching such an amazing milestone, but in my personal life, I'll soon be celebrating the birth of my first-born. With that in mind, over the last few weeks I've tried to close out as many issues as I could before all my spare time is filled with diapers and bottles. Thanks to amazing team of maintainers, contributors, and users that have brought us to where we are today and where we'll go tomorrow.
+
+**Breaking Change:**
+
+- `vim.debug.loggingLevel` has been removed. In it's place we now have `vim.debug.loggingLevelForConsole`. For full details, see the [settings section of our README](https://github.com/VSCodeVim/Vim#vscodevim-settings).
+
+**Enhancements:**
+
+- feat: change debug configurations to loggingLevelForConsole, loggingLevelForAlert [\#3325](https://github.com/VSCodeVim/Vim/pull/3325) ([jpoon](https://github.com/jpoon))
+
+**Fixed Bugs:**
+
+- Status Bar Color did not changed with the mode [\#3316](https://github.com/VSCodeVim/Vim/issues/3316)
+- Error when remapping to commands with name starting with "extension." [\#3307](https://github.com/VSCodeVim/Vim/issues/3307)
+
+**Closed issues:**
+
+- gf: 'try to find it with the same extension'-code doesn't work [\#3309](https://github.com/VSCodeVim/Vim/issues/3309)
+- Extension causes high cpu load [\#3289](https://github.com/VSCodeVim/Vim/issues/3289)
+- The Vim plugin can not edit except i/a/s [\#3270](https://github.com/VSCodeVim/Vim/issues/3270)
+- Keyboard stops working with VSCode when indenting multiline \[MacOS Mojave\] [\#3206](https://github.com/VSCodeVim/Vim/issues/3206)
+- ctrl o shortcut not work sometimes [\#3074](https://github.com/VSCodeVim/Vim/issues/3074)
+
+**Merged pull requests:**
+
+- fix: closes \#3316 [\#3321](https://github.com/VSCodeVim/Vim/pull/3321) ([jpoon](https://github.com/jpoon))
+- fix: Actually fix \#3295. [\#3320](https://github.com/VSCodeVim/Vim/pull/3320) ([jpoon](https://github.com/jpoon))
+- refactor: disableExtension configuration should follow pattern of rest of configs [\#3318](https://github.com/VSCodeVim/Vim/pull/3318) ([jpoon](https://github.com/jpoon))
+- feat: show vim errors in vscode informational window [\#3315](https://github.com/VSCodeVim/Vim/pull/3315) ([jpoon](https://github.com/jpoon))
+- fix: log warning if remapped command does not exist. closes \#3307 [\#3314](https://github.com/VSCodeVim/Vim/pull/3314) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency @types/sinon to v7.0.3 [\#3313](https://github.com/VSCodeVim/Vim/pull/3313) ([renovate-bot](https://github.com/renovate-bot))
+- v0.17.3 [\#3306](https://github.com/VSCodeVim/Vim/pull/3306) ([jpoon](https://github.com/jpoon))
+
+## [v0.17.3](https://github.com/vscodevim/vim/tree/v0.17.3) (2018-12-30)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.17.2...v0.17.3)
+
+**Enhancements:**
+
+- :on is not an editor command [\#3286](https://github.com/VSCodeVim/Vim/issues/3286)
+- editor.wordSeparators setting is ignored [\#3166](https://github.com/VSCodeVim/Vim/issues/3166)
+- save \(:w or :wq\) with SSHFS and LiveShare guest don't work properly [\#2956](https://github.com/VSCodeVim/Vim/issues/2956)
+
+**Fixed Bugs:**
+
+- \<c-o\> jumps back to wrong location after 'gd' [\#3277](https://github.com/VSCodeVim/Vim/issues/3277)
+
+**Closed issues:**
+
+- Either slash or colon not working [\#3291](https://github.com/VSCodeVim/Vim/issues/3291)
+- s and S Key Commands Not Working [\#3274](https://github.com/VSCodeVim/Vim/issues/3274)
+- Extension Host is unresponsive [\#3056](https://github.com/VSCodeVim/Vim/issues/3056)
+- Vim mode randomly not functional - show warning [\#2725](https://github.com/VSCodeVim/Vim/issues/2725)
+- Is hanging. [\#2629](https://github.com/VSCodeVim/Vim/issues/2629)
+
+**Merged pull requests:**
+
+- fix: sync editor.wordSeparators and vim.iskeyword. closes \#3166 [\#3305](https://github.com/VSCodeVim/Vim/pull/3305) ([jpoon](https://github.com/jpoon))
+- feat: add on as alias for only [\#3303](https://github.com/VSCodeVim/Vim/pull/3303) ([jpoon](https://github.com/jpoon))
+- fix: \#3277 [\#3302](https://github.com/VSCodeVim/Vim/pull/3302) ([jpoon](https://github.com/jpoon))
+- fix saving remote file error [\#3281](https://github.com/VSCodeVim/Vim/pull/3281) ([zhuzisheng](https://github.com/zhuzisheng))
+
+## [v0.17.2](https://github.com/vscodevim/vim/tree/v0.17.2) (2018-12-28)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.17.1...v0.17.2)
+
+**Fixed Bugs:**
+
+- v0.17.1 prints `\<tab\>` string for every tab keystroke [\#3298](https://github.com/VSCodeVim/Vim/issues/3298)
+
+**Merged pull requests:**
+
+- fix: v0.17.1 regression [\#3299](https://github.com/VSCodeVim/Vim/pull/3299) ([jpoon](https://github.com/jpoon))
+- v0.17.0-\>v0.17.1 [\#3297](https://github.com/VSCodeVim/Vim/pull/3297) ([jpoon](https://github.com/jpoon))
+
+## [v0.17.1](https://github.com/vscodevim/vim/tree/v0.17.1) (2018-12-28)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.17.0...v0.17.1)
+
+**Fixed Bugs:**
+
+- Keybindings reset on invalid command [\#3295](https://github.com/VSCodeVim/Vim/issues/3295)
+
+**Closed issues:**
+
+- For easy motion plugin, allow user to remap leader key. [\#3244](https://github.com/VSCodeVim/Vim/issues/3244)
+- after opening user settings, all Vim keybindings are disabled [\#3029](https://github.com/VSCodeVim/Vim/issues/3029)
+
+**Merged pull requests:**
+
+- fix: ignore remappings with non-existent commands. fixes \#3295 [\#3296](https://github.com/VSCodeVim/Vim/pull/3296) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update node.js to v8.15 [\#3294](https://github.com/VSCodeVim/Vim/pull/3294) ([renovate-bot](https://github.com/renovate-bot))
+- fix: slightly improve perf by caching vscode context [\#3293](https://github.com/VSCodeVim/Vim/pull/3293) ([jpoon](https://github.com/jpoon))
+- fix: disable nvim shada [\#3288](https://github.com/VSCodeVim/Vim/pull/3288) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency @types/sinon to v7.0.2 [\#3279](https://github.com/VSCodeVim/Vim/pull/3279) ([renovate-bot](https://github.com/renovate-bot))
+- refactor: status bar [\#3276](https://github.com/VSCodeVim/Vim/pull/3276) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency @types/node to v9.6.41 [\#3275](https://github.com/VSCodeVim/Vim/pull/3275) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency tslint to v5.12.0 [\#3272](https://github.com/VSCodeVim/Vim/pull/3272) ([renovate-bot](https://github.com/renovate-bot))
+- Release [\#3271](https://github.com/VSCodeVim/Vim/pull/3271) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency typescript to v3.2.2 [\#3234](https://github.com/VSCodeVim/Vim/pull/3234) ([renovate-bot](https://github.com/renovate-bot))
+
+## [v0.17.0](https://github.com/vscodevim/vim/tree/v0.17.0) (2018-12-17)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.14...v0.17.0)
+
+**Fixed Bugs:**
+
+- Running :reg when clipboard is empty causes an error [\#2898](https://github.com/VSCodeVim/Vim/issues/2898)
+
+**Merged pull requests:**
+
+- Change to use native vscode clipboard [\#3261](https://github.com/VSCodeVim/Vim/pull/3261) ([xconverge](https://github.com/xconverge))
+- chore\(deps\): update dependency @types/sinon to v7 [\#3259](https://github.com/VSCodeVim/Vim/pull/3259) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency sinon to v7.2.1 [\#3258](https://github.com/VSCodeVim/Vim/pull/3258) ([renovate-bot](https://github.com/renovate-bot))
+- v0.16.13 -\> v0.16.14 [\#3257](https://github.com/VSCodeVim/Vim/pull/3257) ([jpoon](https://github.com/jpoon))
+
+## [v0.16.14](https://github.com/vscodevim/vim/tree/v0.16.14) (2018-12-11)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.13...v0.16.14)
+
+**Enhancements:**
+
+- Add support for new grid layout with splits [\#2696](https://github.com/VSCodeVim/Vim/issues/2696)
+
+**Fixed Bugs:**
+
+- It seems % command is not treated like a motion [\#3138](https://github.com/VSCodeVim/Vim/issues/3138)
+
+**Closed issues:**
+
+- vim.normalModeKeyBindingsNonRecursive do not work [\#3247](https://github.com/VSCodeVim/Vim/issues/3247)
+- Status bar in zen mode [\#3245](https://github.com/VSCodeVim/Vim/issues/3245)
+- When closing a window with `:q` VS Code now selects the tab "before" the one you were previously on [\#2984](https://github.com/VSCodeVim/Vim/issues/2984)
+
+**Merged pull requests:**
+
+- chore\(deps\): update dependency vscode to v1.1.26 [\#3256](https://github.com/VSCodeVim/Vim/pull/3256) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency sinon to v7.2.0 [\#3255](https://github.com/VSCodeVim/Vim/pull/3255) ([renovate-bot](https://github.com/renovate-bot))
+- Format operator fixes and tests [\#3254](https://github.com/VSCodeVim/Vim/pull/3254) ([watsoncj](https://github.com/watsoncj))
+- Added common example for key remapping for £ [\#3250](https://github.com/VSCodeVim/Vim/pull/3250) ([ycmjason](https://github.com/ycmjason))
+- chore\(deps\): update dependency @types/lodash to v4.14.119 [\#3246](https://github.com/VSCodeVim/Vim/pull/3246) ([renovate-bot](https://github.com/renovate-bot))
+- Re-implement `` and '' with jumpTracker [\#3242](https://github.com/VSCodeVim/Vim/pull/3242) ([dsschnau](https://github.com/dsschnau))
+- chore\(deps\): update dependency gulp-typescript to v5 [\#3240](https://github.com/VSCodeVim/Vim/pull/3240) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency prettier to v1.15.3 [\#3236](https://github.com/VSCodeVim/Vim/pull/3236) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency @types/node to v9.6.40 [\#3235](https://github.com/VSCodeVim/Vim/pull/3235) ([renovate-bot](https://github.com/renovate-bot))
+- fix typo [\#3230](https://github.com/VSCodeVim/Vim/pull/3230) ([fourcels](https://github.com/fourcels))
+- chore\(deps\): update node.js to v8.14 [\#3228](https://github.com/VSCodeVim/Vim/pull/3228) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency vscode to v1.1.24 [\#3224](https://github.com/VSCodeVim/Vim/pull/3224) ([renovate-bot](https://github.com/renovate-bot))
+- Fix \#2984: wrong tab selected after :quit [\#3170](https://github.com/VSCodeVim/Vim/pull/3170) ([ohjames](https://github.com/ohjames))
+
+## [v0.16.13](https://github.com/vscodevim/vim/tree/v0.16.13) (2018-11-27)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.12...v0.16.13)
+
+**Fixed Bugs:**
+
+- Finding with `?` renders `/` in the status bar instead of `?` [\#3211](https://github.com/VSCodeVim/Vim/issues/3211)
+- Test docker - debconf enforces interactive during build [\#3168](https://github.com/VSCodeVim/Vim/issues/3168)
+
+**Closed issues:**
+
+- Problem with insert mode after highlighting in visual mode [\#3174](https://github.com/VSCodeVim/Vim/issues/3174)
+- Recursive mapping V key [\#3173](https://github.com/VSCodeVim/Vim/issues/3173)
+- Code Action not working when using Vim mappings [\#3160](https://github.com/VSCodeVim/Vim/issues/3160)
+
+**Merged pull requests:**
+
+- v0.16.13 [\#3223](https://github.com/VSCodeVim/Vim/pull/3223) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update node.js to v8.13 [\#3222](https://github.com/VSCodeVim/Vim/pull/3222) ([renovate-bot](https://github.com/renovate-bot))
+- display '?' or '/' in status bar in search mode [\#3218](https://github.com/VSCodeVim/Vim/pull/3218) ([dsschnau](https://github.com/dsschnau))
+- fix: upgrade sinon 5.0.5-\>5.0.7. prettier 1.14.3-\>1.15.2 [\#3217](https://github.com/VSCodeVim/Vim/pull/3217) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency @types/node to v9.6.39 [\#3215](https://github.com/VSCodeVim/Vim/pull/3215) ([renovate-bot](https://github.com/renovate-bot))
+- Fix \#1287: CJK characters\(korean\) overlap each other in insert mode [\#3214](https://github.com/VSCodeVim/Vim/pull/3214) ([Injae-Lee](https://github.com/Injae-Lee))
+- chore\(deps\): update dependency @types/node to v9.6.37 [\#3204](https://github.com/VSCodeVim/Vim/pull/3204) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency @types/lodash to v4.14.118 [\#3196](https://github.com/VSCodeVim/Vim/pull/3196) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update node.js to v8.12 [\#3194](https://github.com/VSCodeVim/Vim/pull/3194) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency @types/diff to v3.5.2 [\#3193](https://github.com/VSCodeVim/Vim/pull/3193) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency typescript to v3.1.6 [\#3188](https://github.com/VSCodeVim/Vim/pull/3188) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency @types/node to v9.6.36 [\#3187](https://github.com/VSCodeVim/Vim/pull/3187) ([renovate-bot](https://github.com/renovate-bot))
+- docs: update roadmap for split and new [\#3184](https://github.com/VSCodeVim/Vim/pull/3184) ([jpoon](https://github.com/jpoon))
+- fix: automerge renovate minor/patch [\#3183](https://github.com/VSCodeVim/Vim/pull/3183) ([jpoon](https://github.com/jpoon))
+- Update dependency typescript to v3.1.5 [\#3182](https://github.com/VSCodeVim/Vim/pull/3182) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency typescript to v3.1.4 [\#3175](https://github.com/VSCodeVim/Vim/pull/3175) ([renovate-bot](https://github.com/renovate-bot))
+- Issue \#3168 - Ubuntu tests [\#3169](https://github.com/VSCodeVim/Vim/pull/3169) ([pschoffer](https://github.com/pschoffer))
+- v0.16.12 [\#3165](https://github.com/VSCodeVim/Vim/pull/3165) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency sinon to v7.1.1 [\#3162](https://github.com/VSCodeVim/Vim/pull/3162) ([renovate-bot](https://github.com/renovate-bot))
+- Convert synchronous funcs to async [\#3123](https://github.com/VSCodeVim/Vim/pull/3123) ([kylecarbs](https://github.com/kylecarbs))
+
+## [v0.16.12](https://github.com/vscodevim/vim/tree/v0.16.12) (2018-10-26)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.11...v0.16.12)
+
+**Fixed Bugs:**
+
+- Gulp test with Docker fails to launch [\#3152](https://github.com/VSCodeVim/Vim/issues/3152)
+- The link to \*Multi-Cursor\* mode in \_\_Table of content\_\_ doesn't work \(in repo\) [\#3149](https://github.com/VSCodeVim/Vim/issues/3149)
+- Multi-Cursor + insertModeKeyBinding jk -\> \<Esc\> [\#2752](https://github.com/VSCodeVim/Vim/issues/2752)
+
+**Merged pull requests:**
+
+- Add more Docker documentation [\#3156](https://github.com/VSCodeVim/Vim/pull/3156) ([westim](https://github.com/westim))
+- Fix 3152: Upgrade Docker prerequisite libgtk from 2.0 to 3.0 [\#3153](https://github.com/VSCodeVim/Vim/pull/3153) ([westim](https://github.com/westim))
+- Fix \#3149: broken table of contents links [\#3151](https://github.com/VSCodeVim/Vim/pull/3151) ([westim](https://github.com/westim))
+- Fix for \#2752 [\#3131](https://github.com/VSCodeVim/Vim/pull/3131) ([donald93](https://github.com/donald93))
+
+## [v0.16.11](https://github.com/vscodevim/vim/tree/v0.16.11) (2018-10-19)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.10...v0.16.11)
+
+**Closed issues:**
+
+- Version 0.16.10 stuck in insert mode [\#3143](https://github.com/VSCodeVim/Vim/issues/3143)
+- fold code block bug [\#3140](https://github.com/VSCodeVim/Vim/issues/3140)
+- Escape key stopped being registered so can't exit insert mode [\#3139](https://github.com/VSCodeVim/Vim/issues/3139)
+
+**Merged pull requests:**
+
+- Prevent error on loading search history if no active editor on startup [\#3146](https://github.com/VSCodeVim/Vim/pull/3146) ([shawnaxsom](https://github.com/shawnaxsom))
+- v0.16.10 [\#3137](https://github.com/VSCodeVim/Vim/pull/3137) ([jpoon](https://github.com/jpoon))
+
+## [v0.16.10](https://github.com/vscodevim/vim/tree/v0.16.10) (2018-10-14)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.9...v0.16.10)
+
+**Enhancements:**
+
+- Previous searches are not saved across sessions [\#3098](https://github.com/VSCodeVim/Vim/issues/3098)
+- substitution statefulness [\#3067](https://github.com/VSCodeVim/Vim/issues/3067)
+- feat: implement 'changeWordIncludesWhitespace' option [\#2964](https://github.com/VSCodeVim/Vim/pull/2964) ([darfink](https://github.com/darfink))
+
+**Fixed Bugs:**
+
+- Wrong cursor position after using same file in two panels [\#2688](https://github.com/VSCodeVim/Vim/issues/2688)
+- Search and replace doesn't work with current line \(.\) and relative lines [\#2384](https://github.com/VSCodeVim/Vim/issues/2384)
+
+**Closed issues:**
+
+- Broken on Insiders build [\#3119](https://github.com/VSCodeVim/Vim/issues/3119)
+- Cannot bind \<C-h\> [\#3072](https://github.com/VSCodeVim/Vim/issues/3072)
+- CTRL-\[ does not quit the command-line editing mode [\#3019](https://github.com/VSCodeVim/Vim/issues/3019)
+
+**Merged pull requests:**
+
+- chore\(deps\): update dependency sinon to v7 [\#3135](https://github.com/VSCodeVim/Vim/pull/3135) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency typescript to v3.1.3 [\#3130](https://github.com/VSCodeVim/Vim/pull/3130) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency typescript to v3.1.2 [\#3122](https://github.com/VSCodeVim/Vim/pull/3122) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/node to v9.6.35 [\#3121](https://github.com/VSCodeVim/Vim/pull/3121) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/lodash to v4.14.117 [\#3120](https://github.com/VSCodeVim/Vim/pull/3120) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/sinon to v5.0.5 [\#3118](https://github.com/VSCodeVim/Vim/pull/3118) ([renovate-bot](https://github.com/renovate-bot))
+- Save search history to a file like commandline history [\#3116](https://github.com/VSCodeVim/Vim/pull/3116) ([xconverge](https://github.com/xconverge))
+- fix \(simpler\) - cursor whenever changing editors - closes \#2688 [\#3103](https://github.com/VSCodeVim/Vim/pull/3103) ([captaincaius](https://github.com/captaincaius))
+- feature: relative, plus/minus ranges. closes \#2384 [\#3071](https://github.com/VSCodeVim/Vim/pull/3071) ([captaincaius](https://github.com/captaincaius))
+- Adding state to substitution command [\#3068](https://github.com/VSCodeVim/Vim/pull/3068) ([captaincaius](https://github.com/captaincaius))
+
+## [v0.16.9](https://github.com/vscodevim/vim/tree/v0.16.9) (2018-10-08)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.8...v0.16.9)
+
+**Fixed Bugs:**
+
+- Repeating command \(`.`\) after doing vim-easymotion find character command doesn't work. [\#3111](https://github.com/VSCodeVim/Vim/issues/3111)
+- Incrementing / Decrementing numbers doesn't work when it's after a minus sign and a word [\#3057](https://github.com/VSCodeVim/Vim/issues/3057)
+- Unexpected behavior with easymotion and `.` as repeat command [\#2310](https://github.com/VSCodeVim/Vim/issues/2310)
+
+**Merged pull requests:**
+
+- support "edit" command [\#3114](https://github.com/VSCodeVim/Vim/pull/3114) ([m59peacemaker](https://github.com/m59peacemaker))
+- Minor C-a C-x fix [\#3113](https://github.com/VSCodeVim/Vim/pull/3113) ([xconverge](https://github.com/xconverge))
+- Allow dot to repeat after doing any EasyMotion move [\#3112](https://github.com/VSCodeVim/Vim/pull/3112) ([xconverge](https://github.com/xconverge))
+
+## [v0.16.8](https://github.com/vscodevim/vim/tree/v0.16.8) (2018-10-06)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.7...v0.16.8)
+
+**Closed issues:**
+
+- \<C -c\> stopped working this morning [\#3110](https://github.com/VSCodeVim/Vim/issues/3110)
+- version 0.16.6 cause \<tab\> key insert string for unknown reason [\#3096](https://github.com/VSCodeVim/Vim/issues/3096)
+- yank in visual mode doesn't update register 0 [\#3065](https://github.com/VSCodeVim/Vim/issues/3065)
+- Paste the yanked text with "0p does no work [\#2554](https://github.com/VSCodeVim/Vim/issues/2554)
+- Surround: Keep HTML attributes when changing tags [\#1938](https://github.com/VSCodeVim/Vim/issues/1938)
+
+**Merged pull requests:**
+
+- Fix issues with keybindings when changing to an editor in different mode [\#3108](https://github.com/VSCodeVim/Vim/pull/3108) ([shawnaxsom](https://github.com/shawnaxsom))
+- README cleanup [\#3107](https://github.com/VSCodeVim/Vim/pull/3107) ([xconverge](https://github.com/xconverge))
+- Update readme based on new feature for surround with attributes [\#3106](https://github.com/VSCodeVim/Vim/pull/3106) ([xconverge](https://github.com/xconverge))
+- fixes \#1938 Allow to retain attributes when using surround [\#3105](https://github.com/VSCodeVim/Vim/pull/3105) ([xconverge](https://github.com/xconverge))
+- Multiline yank writes to 0 register; fixes \#1214 [\#3087](https://github.com/VSCodeVim/Vim/pull/3087) ([JKillian](https://github.com/JKillian))
+
+## [v0.16.7](https://github.com/vscodevim/vim/tree/v0.16.7) (2018-10-06)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.6...v0.16.7)
+
+**Merged pull requests:**
+
+- Update dependency @types/sinon to v5.0.4 [\#3104](https://github.com/VSCodeVim/Vim/pull/3104) ([renovate-bot](https://github.com/renovate-bot))
+- Cleanup gt count command [\#3097](https://github.com/VSCodeVim/Vim/pull/3097) ([xconverge](https://github.com/xconverge))
+- Update dependency @types/sinon to v5.0.3 [\#3093](https://github.com/VSCodeVim/Vim/pull/3093) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/node to v9.6.34 [\#3092](https://github.com/VSCodeVim/Vim/pull/3092) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency sinon to v6.3.5 [\#3091](https://github.com/VSCodeVim/Vim/pull/3091) ([renovate-bot](https://github.com/renovate-bot))
+- Remappings not applying with operators that enter insert mode [\#3090](https://github.com/VSCodeVim/Vim/pull/3090) ([shawnaxsom](https://github.com/shawnaxsom))
+- v0.16.6 [\#3085](https://github.com/VSCodeVim/Vim/pull/3085) ([jpoon](https://github.com/jpoon))
+- Add support for grid layout [\#2697](https://github.com/VSCodeVim/Vim/pull/2697) ([rodcloutier](https://github.com/rodcloutier))
+
+## [v0.16.6](https://github.com/vscodevim/vim/tree/v0.16.6) (2018-10-02)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.5...v0.16.6)
+
+**Fixed Bugs:**
+
+- Confirm-Replace works incorrectly with global substitute for certain types of replace patterns [\#2950](https://github.com/VSCodeVim/Vim/issues/2950)
+- Remapping `d` to always delete to black-hole [\#2672](https://github.com/VSCodeVim/Vim/issues/2672)
+
+**Closed issues:**
+
+- Visual Block Mode when not using Ctrl keys [\#3042](https://github.com/VSCodeVim/Vim/issues/3042)
+- Investigate reducing startup activation time [\#2947](https://github.com/VSCodeVim/Vim/issues/2947)
+
+**Merged pull requests:**
+
+- Feature/fix black hole operator mappings [\#3081](https://github.com/VSCodeVim/Vim/pull/3081) ([shawnaxsom](https://github.com/shawnaxsom))
+- Feature/insert mode optimizations [\#3078](https://github.com/VSCodeVim/Vim/pull/3078) ([shawnaxsom](https://github.com/shawnaxsom))
+- Update dependency typescript to v3.1.1 [\#3077](https://github.com/VSCodeVim/Vim/pull/3077) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/node to v9.6.32 [\#3066](https://github.com/VSCodeVim/Vim/pull/3066) ([renovate-bot](https://github.com/renovate-bot))
+- Fix substitute with gc flag [\#3055](https://github.com/VSCodeVim/Vim/pull/3055) ([tomotg](https://github.com/tomotg))
+
+## [v0.16.5](https://github.com/vscodevim/vim/tree/v0.16.5) (2018-09-21)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.4...v0.16.5)
+
+**Fixed Bugs:**
+
+- keybinding \<c-f\> overwrite vscode's default behavior [\#3050](https://github.com/VSCodeVim/Vim/issues/3050)
+- New Jump Tracker doesn't always handle that isn't left open in a tab [\#3039](https://github.com/VSCodeVim/Vim/issues/3039)
+- Exiting CommandMode should mimic Vim behavior [\#3035](https://github.com/VSCodeVim/Vim/issues/3035)
+
+**Closed issues:**
+
+- C-o, C-i strange jumping behavior. [\#3047](https://github.com/VSCodeVim/Vim/issues/3047)
+- Support vscode's color copy [\#3038](https://github.com/VSCodeVim/Vim/issues/3038)
+- Possible for `:new` to a open a new editor in the current group without splitting? [\#2911](https://github.com/VSCodeVim/Vim/issues/2911)
+- Support for ' ' \(Jump to previous cursor position\) [\#2031](https://github.com/VSCodeVim/Vim/issues/2031)
+
+**Merged pull requests:**
+
+- Update dependency prettier to v1.14.3 [\#3060](https://github.com/VSCodeVim/Vim/pull/3060) ([renovate-bot](https://github.com/renovate-bot))
+- fix `\<C-f\>` in 「Insert」mode [\#3051](https://github.com/VSCodeVim/Vim/pull/3051) ([myhere](https://github.com/myhere))
+- Support for line completion \(\<C-x\>\<C-l\>\) [\#3048](https://github.com/VSCodeVim/Vim/pull/3048) ([shawnaxsom](https://github.com/shawnaxsom))
+- Update dependency lodash to v4.17.11 [\#3045](https://github.com/VSCodeVim/Vim/pull/3045) ([renovate-bot](https://github.com/renovate-bot))
+- Fixed Jump Tracker jumps when jumping from a file that auto closes [\#3041](https://github.com/VSCodeVim/Vim/pull/3041) ([shawnaxsom](https://github.com/shawnaxsom))
+- Fix: Missing bindings to exit CommandMode. closes \#3035 [\#3036](https://github.com/VSCodeVim/Vim/pull/3036) ([mxlian](https://github.com/mxlian))
+
+## [v0.16.4](https://github.com/vscodevim/vim/tree/v0.16.4) (2018-09-10)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.3...v0.16.4)
+
+**Enhancements:**
+
+- \[FEATURE REQUEST\]visual line mode support A or I [\#2167](https://github.com/VSCodeVim/Vim/issues/2167)
+
+**Closed issues:**
+
+- Moving out of viewport centers the viewport when it shouldn't [\#2998](https://github.com/VSCodeVim/Vim/issues/2998)
+- docs: all-contributors [\#2645](https://github.com/VSCodeVim/Vim/issues/2645)
+- Make small movement command not registered to Ctrl+o [\#1933](https://github.com/VSCodeVim/Vim/issues/1933)
+
+**Merged pull requests:**
+
+- Feature/improved jump list [\#3028](https://github.com/VSCodeVim/Vim/pull/3028) ([shawnaxsom](https://github.com/shawnaxsom))
+- I or A in visual/visual line mode creates multiple cursors \#2167 [\#2993](https://github.com/VSCodeVim/Vim/pull/2993) ([shawnaxsom](https://github.com/shawnaxsom))
+
+## [v0.16.3](https://github.com/vscodevim/vim/tree/v0.16.3) (2018-09-05)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.2...v0.16.3)
+
+**Enhancements:**
+
+- Add activationEvent 'onCommand:type' to avoid missing keystrokes [\#3016](https://github.com/VSCodeVim/Vim/issues/3016)
+- va{a{ doesn't work [\#2506](https://github.com/VSCodeVim/Vim/issues/2506)
+
+**Closed issues:**
+
+- Expand selection with inner tag selection command [\#2907](https://github.com/VSCodeVim/Vim/issues/2907)
+
+**Merged pull requests:**
+
+- fix: re-enable relativelinenumbers. closes \#3020 [\#3025](https://github.com/VSCodeVim/Vim/pull/3025) ([jpoon](https://github.com/jpoon))
+- fix: add activationevent onCommand type. closes \#3016 [\#3023](https://github.com/VSCodeVim/Vim/pull/3023) ([jpoon](https://github.com/jpoon))
+- Update dependency winston to v3.1.0 [\#3021](https://github.com/VSCodeVim/Vim/pull/3021) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency diff-match-patch to v1.0.4 [\#3018](https://github.com/VSCodeVim/Vim/pull/3018) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/node to v9.6.31 [\#3011](https://github.com/VSCodeVim/Vim/pull/3011) ([renovate-bot](https://github.com/renovate-bot))
+- Fix multiple issues with expand selection commands and pair/block movement [\#2921](https://github.com/VSCodeVim/Vim/pull/2921) ([xmbhasin](https://github.com/xmbhasin))
+
+## [v0.16.2](https://github.com/vscodevim/vim/tree/v0.16.2) (2018-08-30)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.1...v0.16.2)
+
+**Closed issues:**
+
+- Intermediate cursor shape to show that a command is being entered [\#2999](https://github.com/VSCodeVim/Vim/issues/2999)
+
+**Merged pull requests:**
+
+- Revert "Center cursor vertically on movement out of viewport" [\#3009](https://github.com/VSCodeVim/Vim/pull/3009) ([hhu94](https://github.com/hhu94))
+- Update dependency typescript to v3.0.3 [\#3008](https://github.com/VSCodeVim/Vim/pull/3008) ([renovate-bot](https://github.com/renovate-bot))
+- Update vim.searchHighlightColor in README.md [\#3007](https://github.com/VSCodeVim/Vim/pull/3007) ([ytang](https://github.com/ytang))
+- v0.16.1 [\#2997](https://github.com/VSCodeVim/Vim/pull/2997) ([jpoon](https://github.com/jpoon))
+
+## [v0.16.1](https://github.com/vscodevim/vim/tree/v0.16.1) (2018-08-27)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.16.0...v0.16.1)
+
+**Fixed Bugs:**
+
+- `:vsp file\_name` cannot open file_name, although this file does exist [\#2983](https://github.com/VSCodeVim/Vim/issues/2983)
+- `gf` \(go to file under cursor\) produces the "Vim: The file ... does not exist." error, even though file clearly exists [\#2966](https://github.com/VSCodeVim/Vim/issues/2966)
+- Open File with :e deletes file content [\#2963](https://github.com/VSCodeVim/Vim/issues/2963)
+
+**Closed issues:**
+
+- "before": \["\<C-x\>", "C-s\>"\] not work. [\#2949](https://github.com/VSCodeVim/Vim/issues/2949)
+- VSCodeVim airline affecting color scheme [\#2948](https://github.com/VSCodeVim/Vim/issues/2948)
+- \[Feature Request\] : ReplaceWithRegister [\#2937](https://github.com/VSCodeVim/Vim/issues/2937)
+- % should match on strings & chars [\#2935](https://github.com/VSCodeVim/Vim/issues/2935)
+- Throw away the mouse [\#2922](https://github.com/VSCodeVim/Vim/issues/2922)
+- Wried cursor behavior with INSERT MULTI CURSOR mode [\#2910](https://github.com/VSCodeVim/Vim/issues/2910)
+
+**Merged pull requests:**
+
+- Lazy Load Neovim [\#2992](https://github.com/VSCodeVim/Vim/pull/2992) ([jpoon](https://github.com/jpoon))
+- Update dependency @types/node to v9.6.30 [\#2987](https://github.com/VSCodeVim/Vim/pull/2987) ([renovate-bot](https://github.com/renovate-bot))
+- Fix type in ROADMAP.md [\#2980](https://github.com/VSCodeVim/Vim/pull/2980) ([nickebbitt](https://github.com/nickebbitt))
+- Fix emulated plugins link in README [\#2977](https://github.com/VSCodeVim/Vim/pull/2977) ([jjt](https://github.com/jjt))
+- Fix `gf` showing error for files which exist [\#2969](https://github.com/VSCodeVim/Vim/pull/2969) ([arussellk](https://github.com/arussellk))
+- Fix Typo in ROADMAP [\#2967](https://github.com/VSCodeVim/Vim/pull/2967) ([AdrieanKhisbe](https://github.com/AdrieanKhisbe))
+- Center cursor vertically on movement out of viewport [\#2962](https://github.com/VSCodeVim/Vim/pull/2962) ([hhu94](https://github.com/hhu94))
+- chore\(deps\): update dependency vscode to v1.1.21 [\#2958](https://github.com/VSCodeVim/Vim/pull/2958) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency @types/node to v9.6.28 [\#2952](https://github.com/VSCodeVim/Vim/pull/2952) ([renovate-bot](https://github.com/renovate-bot))
+
+## [v0.16.0](https://github.com/vscodevim/vim/tree/v0.16.0) (2018-08-09)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.7...v0.16.0)
+
+**Enhancements:**
+
+- Reenable change that minimized the calls to setContext [\#2900](https://github.com/VSCodeVim/Vim/pull/2900) ([xconverge](https://github.com/xconverge))
+
+**Fixed Bugs:**
+
+- Cannot create files with extensions using :e\[dit\] {file} [\#2923](https://github.com/VSCodeVim/Vim/issues/2923)
+- :tablast broken with vscode 1.25.0 [\#2813](https://github.com/VSCodeVim/Vim/issues/2813)
+- 2gt not goes to the right tab [\#2789](https://github.com/VSCodeVim/Vim/issues/2789)
+
+**Closed issues:**
+
+- "commandlineinprogress": "underline" causes issues [\#2896](https://github.com/VSCodeVim/Vim/issues/2896)
+- Quote macro sometimes doubling in Python [\#2662](https://github.com/VSCodeVim/Vim/issues/2662)
+- easy motion mapping key problem [\#1894](https://github.com/VSCodeVim/Vim/issues/1894)
+
+**Merged pull requests:**
+
+- bump version [\#2946](https://github.com/VSCodeVim/Vim/pull/2946) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency prettier to v1.14.2 [\#2943](https://github.com/VSCodeVim/Vim/pull/2943) ([renovate-bot](https://github.com/renovate-bot))
+- docs: move configs to tables for readability [\#2941](https://github.com/VSCodeVim/Vim/pull/2941) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency @types/node to v9.6.26 [\#2940](https://github.com/VSCodeVim/Vim/pull/2940) ([renovate-bot](https://github.com/renovate-bot))
+- docs: clean-up readme [\#2931](https://github.com/VSCodeVim/Vim/pull/2931) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency @types/lodash to v4.14.116 [\#2930](https://github.com/VSCodeVim/Vim/pull/2930) ([renovate-bot](https://github.com/renovate-bot))
+- fix: files with extensions not being auto-created. closes \#2923. [\#2928](https://github.com/VSCodeVim/Vim/pull/2928) ([jpoon](https://github.com/jpoon))
+- chore\(deps\): update dependency @types/node to v9.6.25 [\#2927](https://github.com/VSCodeVim/Vim/pull/2927) ([renovate-bot](https://github.com/renovate-bot))
+- Fix :tablast breaking in vscode 1.25 \#2813 [\#2926](https://github.com/VSCodeVim/Vim/pull/2926) ([Roshanjossey](https://github.com/Roshanjossey))
+- chore\(deps\): update dependency typescript to v3 [\#2920](https://github.com/VSCodeVim/Vim/pull/2920) ([renovate-bot](https://github.com/renovate-bot))
+- chore\(deps\): update dependency gulp-git to v2.8.0 [\#2919](https://github.com/VSCodeVim/Vim/pull/2919) ([renovate-bot](https://github.com/renovate-bot))
+- Fix Emulated Plugins TOC link in README [\#2918](https://github.com/VSCodeVim/Vim/pull/2918) ([jjt](https://github.com/jjt))
+- fix: use full path for configs [\#2915](https://github.com/VSCodeVim/Vim/pull/2915) ([jpoon](https://github.com/jpoon))
+- fix: enable prettier for md [\#2909](https://github.com/VSCodeVim/Vim/pull/2909) ([jpoon](https://github.com/jpoon))
+- Update dependency prettier to v1.14.0 [\#2908](https://github.com/VSCodeVim/Vim/pull/2908) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/node to v9.6.24 [\#2906](https://github.com/VSCodeVim/Vim/pull/2906) ([renovate-bot](https://github.com/renovate-bot))
+- Update dependency @types/lodash to v4.14.115 [\#2905](https://github.com/VSCodeVim/Vim/pull/2905) ([renovate-bot](https://github.com/renovate-bot))
+- Add --grep flag to gulp test [\#2904](https://github.com/VSCodeVim/Vim/pull/2904) ([xmbhasin](https://github.com/xmbhasin))
+- Update dependency @types/lodash to v4.14.114 [\#2901](https://github.com/VSCodeVim/Vim/pull/2901) ([renovate-bot](https://github.com/renovate-bot))
+- Fix gt tab navigation with count prefix [\#2899](https://github.com/VSCodeVim/Vim/pull/2899) ([xconverge](https://github.com/xconverge))
+- Updating README FAQ [\#2894](https://github.com/VSCodeVim/Vim/pull/2894) ([augustnmonteiro](https://github.com/augustnmonteiro))
+- refactor baseaction [\#2892](https://github.com/VSCodeVim/Vim/pull/2892) ([jpoon](https://github.com/jpoon))
+- Revert "fix: use ferrarimarco's image instead of my fork to generate changelog" [\#2891](https://github.com/VSCodeVim/Vim/pull/2891) ([jpoon](https://github.com/jpoon))
+- Integrate SmartIM to VSCodeVim [\#2643](https://github.com/VSCodeVim/Vim/pull/2643) ([daipeihust](https://github.com/daipeihust))
+
+## [v0.15.7](https://github.com/vscodevim/vim/tree/v0.15.7) (2018-07-25)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.6...v0.15.7)
+
+**Enhancements:**
+
+- Please use vscode's config folder for .cmdline_history [\#2799](https://github.com/VSCodeVim/Vim/issues/2799)
+- Improve neovim command execution status reporting in status bar [\#2878](https://github.com/VSCodeVim/Vim/pull/2878) ([xconverge](https://github.com/xconverge))
+
+**Fixed Bugs:**
+
+- 'r' in insert mode not entered when typed quickly [\#2888](https://github.com/VSCodeVim/Vim/issues/2888)
+- Vim extension stops working [\#2873](https://github.com/VSCodeVim/Vim/issues/2873)
+
+**Closed issues:**
+
+- hjkl keys as arrow keys in intellisense contextual menu do not work [\#2885](https://github.com/VSCodeVim/Vim/issues/2885)
+
+**Merged pull requests:**
+
+- Fix issue with incorrectly finding and triggering certain remappings [\#2890](https://github.com/VSCodeVim/Vim/pull/2890) ([xconverge](https://github.com/xconverge))
+- Move commandline history to XDG_CACHE_HOME or %APPDATA% [\#2889](https://github.com/VSCodeVim/Vim/pull/2889) ([xconverge](https://github.com/xconverge))
+- fix: use ferrarimarco's image instead of my fork to generate changelog [\#2884](https://github.com/VSCodeVim/Vim/pull/2884) ([jpoon](https://github.com/jpoon))
+- fix: use map to search for relevant actions. \#2021 [\#2883](https://github.com/VSCodeVim/Vim/pull/2883) ([jpoon](https://github.com/jpoon))
+- fix: handle non-string remapped key. closes \#2873 [\#2881](https://github.com/VSCodeVim/Vim/pull/2881) ([jpoon](https://github.com/jpoon))
+
+## [v0.15.6](https://github.com/vscodevim/vim/tree/v0.15.6) (2018-07-24)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.5...v0.15.6)
+
+**Merged pull requests:**
+
+- Fix regression with setContext in modeHandler [\#2880](https://github.com/VSCodeVim/Vim/pull/2880) ([xconverge](https://github.com/xconverge))
+
+## [v0.15.5](https://github.com/vscodevim/vim/tree/v0.15.5) (2018-07-24)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.4...v0.15.5)
+
+**Merged pull requests:**
+
+- Neovim integration show errors when using commandline at correct times [\#2877](https://github.com/VSCodeVim/Vim/pull/2877) ([xconverge](https://github.com/xconverge))
+- Improve error reporting with neovim commandline [\#2876](https://github.com/VSCodeVim/Vim/pull/2876) ([xconverge](https://github.com/xconverge))
+- chore\(deps\): update dependency @types/lodash to v4.14.113 [\#2875](https://github.com/VSCodeVim/Vim/pull/2875) ([renovate-bot](https://github.com/renovate-bot))
+
+## [v0.15.4](https://github.com/vscodevim/vim/tree/v0.15.4) (2018-07-24)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.3...v0.15.4)
+
+**Enhancements:**
+
+- Moving down at a fold that's at the end of the file causes an infinite loop [\#1855](https://github.com/VSCodeVim/Vim/issues/1855)
+
+**Fixed Bugs:**
+
+- Long key chords does not trigger configured action. [\#2735](https://github.com/VSCodeVim/Vim/issues/2735)
+- Cursor jumps erratically before moving vertically [\#2163](https://github.com/VSCodeVim/Vim/issues/2163)
+
+**Closed issues:**
+
+- ^f stopped working after 1.25.1 update [\#2865](https://github.com/VSCodeVim/Vim/issues/2865)
+- Switching escape and capslock [\#2859](https://github.com/VSCodeVim/Vim/issues/2859)
+
+**Merged pull requests:**
+
+- fix: add missing wrapkeys to test configuration [\#2871](https://github.com/VSCodeVim/Vim/pull/2871) ([jpoon](https://github.com/jpoon))
+- Improve foldfix performance and potentially fix some bugs\(\#1855 \#2163\) [\#2867](https://github.com/VSCodeVim/Vim/pull/2867) ([xmbhasin](https://github.com/xmbhasin))
+- Roadmap doc fix for visual mode case switching [\#2866](https://github.com/VSCodeVim/Vim/pull/2866) ([pjlangley](https://github.com/pjlangley))
+- Add whichwrap [\#2864](https://github.com/VSCodeVim/Vim/pull/2864) ([davidmfoley](https://github.com/davidmfoley))
+- docs: add section on debugging remappings [\#2862](https://github.com/VSCodeVim/Vim/pull/2862) ([jpoon](https://github.com/jpoon))
+- Cache mode so that calls to setContext is minimized [\#2861](https://github.com/VSCodeVim/Vim/pull/2861) ([xconverge](https://github.com/xconverge))
+- Workaround surround bug [\#2830](https://github.com/VSCodeVim/Vim/pull/2830) ([reujab](https://github.com/reujab))
+- Add unit test for long user configured chords. [\#2736](https://github.com/VSCodeVim/Vim/pull/2736) ([regiontog](https://github.com/regiontog))
+
+## [v0.15.3](https://github.com/vscodevim/vim/tree/v0.15.3) (2018-07-20)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.2...v0.15.3)
+
+**Fixed Bugs:**
+
+- :\$ requires additional enter to go to end of buffer [\#2858](https://github.com/VSCodeVim/Vim/issues/2858)
+
+**Merged pull requests:**
+
+- Fixes \$ and % commands [\#2860](https://github.com/VSCodeVim/Vim/pull/2860) ([xconverge](https://github.com/xconverge))
+- fixed buggy interactive substitute replacements [\#2857](https://github.com/VSCodeVim/Vim/pull/2857) ([kevintighe](https://github.com/kevintighe))
+
+## [v0.15.2](https://github.com/vscodevim/vim/tree/v0.15.2) (2018-07-19)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.1...v0.15.2)
+
+**Fixed Bugs:**
+
+- Change surround tag with tag including a dot [\#2850](https://github.com/VSCodeVim/Vim/issues/2850)
+- Delete using \('d' + 'number' + '+/-'\) \(e.g. d5+\) doesn't work like expected. [\#2846](https://github.com/VSCodeVim/Vim/issues/2846)
+
+**Merged pull requests:**
+
+- fixes \#2850 [\#2856](https://github.com/VSCodeVim/Vim/pull/2856) ([xconverge](https://github.com/xconverge))
+- fix: don't run test when launching through vscode [\#2854](https://github.com/VSCodeVim/Vim/pull/2854) ([jpoon](https://github.com/jpoon))
+- v0.15.1 [\#2853](https://github.com/VSCodeVim/Vim/pull/2853) ([jpoon](https://github.com/jpoon))
+- Interactive Substitute [\#2851](https://github.com/VSCodeVim/Vim/pull/2851) ([kevintighe](https://github.com/kevintighe))
+
+## [v0.15.1](https://github.com/vscodevim/vim/tree/v0.15.1) (2018-07-17)
+
+[Full Changelog](https://github.com/vscodevim/vim/compare/v0.15.0...v0.15.1)
+
+**Enhancements:**
+
+- Option case-insensitive for vim-sneak [\#2829](https://github.com/VSCodeVim/Vim/issues/2829)
+- "x" operation far too cpu-hungry [\#1581](https://github.com/VSCodeVim/Vim/issues/1581)
+
+**Fixed Bugs:**
+
+- ctrl+v no longer pastes in insert mode [\#2646](https://github.com/VSCodeVim/Vim/issues/2646)
+
+**Merged pull requests:**
+
+- fix: upgrade winston to 3.0 [\#2852](https://github.com/VSCodeVim/Vim/pull/2852) ([jpoon](https://github.com/jpoon))
+- update tslint and fix radix linting [\#2849](https://github.com/VSCodeVim/Vim/pull/2849) ([xconverge](https://github.com/xconverge))
+- Update dependency @types/mocha to v5.2.5 [\#2847](https://github.com/VSCodeVim/Vim/pull/2847) ([renovate-bot](https://github.com/renovate-bot))
+- gulp release [\#2841](https://github.com/VSCodeVim/Vim/pull/2841) ([jpoon](https://github.com/jpoon))
+- Update dependency @types/lodash to v4.14.112 [\#2839](https://github.com/VSCodeVim/Vim/pull/2839) ([renovate-bot](https://github.com/renovate-bot))
+- Add config option for sneak to use smartcase and ignorecase [\#2837](https://github.com/VSCodeVim/Vim/pull/2837) ([xconverge](https://github.com/xconverge))
+
 ## [v0.15.0](https://github.com/vscodevim/vim/tree/v0.15.0) (2018-07-12)
 
 [Full Changelog](https://github.com/vscodevim/vim/compare/v0.14.2...v0.15.0)
@@ -390,7 +1005,7 @@
 - refactor\(modehandler-updateview\): use map and remove unused context [\#2197](https://github.com/VSCodeVim/Vim/pull/2197) ([jpoon](https://github.com/jpoon))
 - Integrate TravisBuddy [\#2191](https://github.com/VSCodeVim/Vim/pull/2191) ([bluzi](https://github.com/bluzi))
 - Fix \#2168: Surround offset [\#2171](https://github.com/VSCodeVim/Vim/pull/2171) ([westim](https://github.com/westim))
-- Fix \#1945 $ in VisualBlock works on ragged lines [\#2096](https://github.com/VSCodeVim/Vim/pull/2096) ([Strafos](https://github.com/Strafos))
+- Fix \#1945 \$ in VisualBlock works on ragged lines [\#2096](https://github.com/VSCodeVim/Vim/pull/2096) ([Strafos](https://github.com/Strafos))
 
 ## [v0.10.5](https://github.com/vscodevim/vim/tree/v0.10.5) (2017-11-21)
 
@@ -416,7 +1031,7 @@
 - Code Cleanup [\#2138](https://github.com/VSCodeVim/Vim/pull/2138) ([jpoon](https://github.com/jpoon))
 - Fixed typo in README [\#2137](https://github.com/VSCodeVim/Vim/pull/2137) ([Nonoctis](https://github.com/Nonoctis))
 - fix\(travis\): use lts/carbon \(v8.9.1\) for travis [\#2129](https://github.com/VSCodeVim/Vim/pull/2129) ([jpoon](https://github.com/jpoon))
-- Fix ^, $, add case sensitivity override in search [\#2123](https://github.com/VSCodeVim/Vim/pull/2123) ([parkovski](https://github.com/parkovski))
+- Fix ^, \$, add case sensitivity override in search [\#2123](https://github.com/VSCodeVim/Vim/pull/2123) ([parkovski](https://github.com/parkovski))
 - fix vscode launch/tasks [\#2121](https://github.com/VSCodeVim/Vim/pull/2121) ([jpoon](https://github.com/jpoon))
 - Fix remapping keys to actions with "mustBeFirstKey", fixes \#2216 [\#2117](https://github.com/VSCodeVim/Vim/pull/2117) ([ohjames](https://github.com/ohjames))
 - Fixes \#2113: Start in Disabled mode configuration. [\#2115](https://github.com/VSCodeVim/Vim/pull/2115) ([westim](https://github.com/westim))
@@ -475,7 +1090,7 @@
 - Easymotion new features [\#1967](https://github.com/VSCodeVim/Vim/pull/1967) ([MaxfieldWalker](https://github.com/MaxfieldWalker))
 - Trying to fix the travis issues with neovim [\#1958](https://github.com/VSCodeVim/Vim/pull/1958) ([Chillee](https://github.com/Chillee))
 - Fixes \#1941: Action repetition with Ctrl-\[ [\#1953](https://github.com/VSCodeVim/Vim/pull/1953) ([tagniam](https://github.com/tagniam))
-- Fixes \#1950: counter for $ [\#1952](https://github.com/VSCodeVim/Vim/pull/1952) ([tagniam](https://github.com/tagniam))
+- Fixes \#1950: counter for \$ [\#1952](https://github.com/VSCodeVim/Vim/pull/1952) ([tagniam](https://github.com/tagniam))
 - Makes all tests pass on Windows [\#1939](https://github.com/VSCodeVim/Vim/pull/1939) ([philipmat](https://github.com/philipmat))
 - Update tests due to VSCode PR 28238 [\#1926](https://github.com/VSCodeVim/Vim/pull/1926) ([philipmat](https://github.com/philipmat))
 - fix `z O` unfoldRecursively [\#1924](https://github.com/VSCodeVim/Vim/pull/1924) ([VincentBel](https://github.com/VincentBel))
@@ -1512,8 +2127,8 @@
 - Fix PR builds [\#75](https://github.com/VSCodeVim/Vim/pull/75) ([jpoon](https://github.com/jpoon))
 - Tests [\#74](https://github.com/VSCodeVim/Vim/pull/74) ([jpoon](https://github.com/jpoon))
 - Add commands support for 'gg' and 'G' [\#71](https://github.com/VSCodeVim/Vim/pull/71) ([liushuping](https://github.com/liushuping))
-- fix line end determination for a, A, $ [\#68](https://github.com/VSCodeVim/Vim/pull/68) ([kimitake](https://github.com/kimitake))
-- '$' and '^' for Moving to beginning and end of line [\#66](https://github.com/VSCodeVim/Vim/pull/66) ([josephliccini](https://github.com/josephliccini))
+- fix line end determination for a, A, \$ [\#68](https://github.com/VSCodeVim/Vim/pull/68) ([kimitake](https://github.com/kimitake))
+- '\$' and '^' for Moving to beginning and end of line [\#66](https://github.com/VSCodeVim/Vim/pull/66) ([josephliccini](https://github.com/josephliccini))
 - support x command [\#65](https://github.com/VSCodeVim/Vim/pull/65) ([kimitake](https://github.com/kimitake))
 - Update README.md [\#63](https://github.com/VSCodeVim/Vim/pull/63) ([markrendle](https://github.com/markrendle))
 - map keys from US keyboard to other layouts [\#61](https://github.com/VSCodeVim/Vim/pull/61) ([guillermooo](https://github.com/guillermooo))
@@ -1554,5 +2169,3 @@
 - command line mode refactoring [\#5](https://github.com/VSCodeVim/Vim/pull/5) ([guillermooo](https://github.com/guillermooo))
 - Navigation mode [\#4](https://github.com/VSCodeVim/Vim/pull/4) ([jpoon](https://github.com/jpoon))
 - Add ex mode [\#3](https://github.com/VSCodeVim/Vim/pull/3) ([guillermooo](https://github.com/guillermooo))
-
-\* _This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)_

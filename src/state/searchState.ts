@@ -36,6 +36,10 @@ export class SearchState {
   private _cachedDocumentVersion: number;
   private _cachedDocumentName: String;
   private _searchDirection: SearchDirection = SearchDirection.Forward;
+  public get searchDirection(): SearchDirection {
+    return this._searchDirection;
+  }
+
   private isRegex: boolean;
 
   private _searchString = '';
@@ -58,9 +62,10 @@ export class SearchState {
 
     // checking if the tab that is worked on has changed, or the file version has changed
     const shouldRecalculate =
-      this._cachedDocumentName !== TextEditor.getDocumentName() ||
-      this._cachedDocumentVersion !== TextEditor.getDocumentVersion() ||
-      forceRecalc;
+      TextEditor.isActive &&
+      (this._cachedDocumentName !== TextEditor.getDocumentName() ||
+        this._cachedDocumentVersion !== TextEditor.getDocumentVersion() ||
+        forceRecalc);
 
     if (shouldRecalculate) {
       // Calculate and store all matching ranges
@@ -142,6 +147,10 @@ export class SearchState {
       let wrappedOver = false;
 
       do {
+        if (this._matchRanges.length >= SearchState.MAX_SEARCH_RANGES) {
+          break;
+        }
+
         // We need to wrap around to the back if we reach the end.
         if (!result && !wrappedOver) {
           regex.lastIndex = 0;
@@ -149,9 +158,6 @@ export class SearchState {
           result = regex.exec(text);
         }
         if (!result) {
-          break;
-        }
-        if (this._matchRanges.length >= SearchState.MAX_SEARCH_RANGES) {
           break;
         }
 
@@ -176,14 +182,13 @@ export class SearchState {
           wrappedOver = true;
           result = regex.exec(text);
         }
-      } while (result && !(wrappedOver && result!.index > startPos));
+      } while (result && !(wrappedOver && result!.index >= startPos));
 
-      this._matchRanges.sort(
-        (x, y) =>
-          x.start.line < y.start.line ||
-          (x.start.line === y.start.line && x.start.character < y.start.character)
-            ? -1
-            : 1
+      this._matchRanges.sort((x, y) =>
+        x.start.line < y.start.line ||
+        (x.start.line === y.start.line && x.start.character < y.start.character)
+          ? -1
+          : 1
       );
     }
   }
@@ -197,9 +202,9 @@ export class SearchState {
   public getNextSearchMatchPosition(
     startPosition: Position,
     direction = 1
-  ): { pos: Position; match: boolean } {
-    const { start, match } = this.getNextSearchMatchRange(startPosition, direction);
-    return { pos: start, match };
+  ): { pos: Position; match: boolean; index: number } {
+    const { start, match, index } = this.getNextSearchMatchRange(startPosition, direction);
+    return { pos: start, match, index };
   }
 
   /**
@@ -213,23 +218,24 @@ export class SearchState {
   public getNextSearchMatchRange(
     startPosition: Position,
     direction: number = 1
-  ): { start: Position; end: Position; match: boolean } {
+  ): { start: Position; end: Position; match: boolean; index: number } {
     this._recalculateSearchRanges();
 
     if (this._matchRanges.length === 0) {
       // TODO(bell)
-      return { start: startPosition, end: startPosition, match: false };
+      return { start: startPosition, end: startPosition, match: false, index: -1 };
     }
 
     const effectiveDirection = direction * this._searchDirection;
 
     if (effectiveDirection === SearchDirection.Forward) {
-      for (let matchRange of this._matchRanges) {
+      for (let [index, matchRange] of this._matchRanges.entries()) {
         if (matchRange.start.compareTo(startPosition) > 0) {
           return {
             start: Position.FromVSCodePosition(matchRange.start),
             end: Position.FromVSCodePosition(matchRange.end),
             match: true,
+            index,
           };
         }
       }
@@ -241,14 +247,19 @@ export class SearchState {
         start: Position.FromVSCodePosition(range.start),
         end: Position.FromVSCodePosition(range.end),
         match: true,
+        index: 0,
       };
     } else {
-      for (let matchRange of this._matchRanges.slice(0).reverse()) {
+      for (let [index, matchRange] of this._matchRanges
+        .slice(0)
+        .reverse()
+        .entries()) {
         if (matchRange.start.compareTo(startPosition) < 0) {
           return {
             start: Position.FromVSCodePosition(matchRange.start),
             end: Position.FromVSCodePosition(matchRange.end),
             match: true,
+            index: this._matchRanges.length - index - 1,
           };
         }
       }
@@ -259,30 +270,34 @@ export class SearchState {
         start: Position.FromVSCodePosition(range.start),
         end: Position.FromVSCodePosition(range.end),
         match: true,
+        index: this._matchRanges.length - 1,
       };
     }
   }
 
-  public getSearchMatchRangeOf(pos: Position): { start: Position; end: Position; match: boolean } {
+  public getSearchMatchRangeOf(
+    pos: Position
+  ): { start: Position; end: Position; match: boolean; index: number } {
     this._recalculateSearchRanges();
 
     if (this._matchRanges.length === 0) {
       // TODO(bell)
-      return { start: pos, end: pos, match: false };
+      return { start: pos, end: pos, match: false, index: -1 };
     }
 
-    for (let matchRange of this._matchRanges) {
+    for (let [index, matchRange] of this._matchRanges.entries()) {
       if (matchRange.start.compareTo(pos) <= 0 && matchRange.end.compareTo(pos) > 0) {
         return {
           start: Position.FromVSCodePosition(matchRange.start),
           end: Position.FromVSCodePosition(matchRange.end),
           match: true,
+          index,
         };
       }
     }
 
     // TODO(bell)
-    return { start: pos, end: pos, match: false };
+    return { start: pos, end: pos, match: false, index: -1 };
   }
 
   constructor(

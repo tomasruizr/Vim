@@ -15,9 +15,9 @@ import * as vscode from 'vscode';
 
 import { Position } from './../common/motion/position';
 import { RecordedState } from './../state/recordedState';
+import { Logger } from './../util/logger';
 import { VimState } from './../state/vimState';
 import { TextEditor } from './../textEditor';
-import { logger } from './../util/logger';
 
 const diffEngine = new DiffMatchPatch.diff_match_patch();
 diffEngine.Diff_Timeout = 1; // 1 second
@@ -156,6 +156,7 @@ class HistoryStep {
 }
 
 export class HistoryTracker {
+  private readonly _logger = Logger.get('DocumentChange');
   public lastContentChanges: vscode.TextDocumentContentChangeEvent[];
   public currentContentChanges: vscode.TextDocumentContentChangeEvent[];
 
@@ -183,9 +184,9 @@ export class HistoryTracker {
 
   private get currentHistoryStep(): HistoryStep {
     if (this.currentHistoryStepIndex === -1) {
-      let msg = 'HistoryTracker: Tried to modify history at index -1';
-      logger.debug(msg);
-      throw new Error(msg);
+      const msg = 'Tried to modify history at index -1';
+      this._logger.warn(msg);
+      throw new Error('HistoryTracker:' + msg);
     }
 
     return this.historySteps[this.currentHistoryStepIndex];
@@ -455,7 +456,7 @@ export class HistoryTracker {
    */
   async undoAndRemoveChanges(n: number): Promise<void> {
     if (this.currentHistoryStep.changes.length < n) {
-      logger.debug('HistoryTracker: Something bad happened in removeChange');
+      this._logger.warn('Something bad happened in removeChange');
       return;
     }
 
@@ -622,11 +623,11 @@ export class HistoryTracker {
     this.currentHistoryStepIndex = this.currentHistoryStepIndex - stepsToUndo + 1;
 
     /*
-    * Unlike the goBackHistoryStep() function, this function does not trust the
-    * HistoryStep.cursorStart property. This can lead to invalid cursor position errors.
-    * Since this function reverses change-by-change, rather than step-by-step,
-    * the cursor position is based on the start of the last change that is undone.
-    */
+     * Unlike the goBackHistoryStep() function, this function does not trust the
+     * HistoryStep.cursorStart property. This can lead to invalid cursor position errors.
+     * Since this function reverses change-by-change, rather than step-by-step,
+     * the cursor position is based on the start of the last change that is undone.
+     */
     return lastChange && [lastChange.start];
   }
 

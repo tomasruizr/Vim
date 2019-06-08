@@ -91,10 +91,6 @@ function createChangelog(done) {
       '-v',
       process.cwd() + ':/usr/local/src/your-app',
       imageName,
-      '--user',
-      'vscodevim',
-      '--project',
-      'vim',
       '--token',
       gitHubToken,
       '--future-release',
@@ -176,6 +172,13 @@ gulp.task('forceprettier', function(done) {
   runPrettier('git ls-files', done);
 });
 
+gulp.task('commit-hash', function(done) {
+  git.revParse({ args: 'HEAD', quiet: true }, function(err, hash) {
+    require('fs').writeFileSync('out/version', hash);
+    done();
+  });
+});
+
 // test
 gulp.task('test', function(done) {
   // the flag --grep takes js regex as a string and filters by test and test suite names
@@ -228,10 +231,17 @@ gulp.task('test', function(done) {
   });
 });
 
-gulp.task('build', gulp.series('prettier', gulp.parallel('tsc', 'tslint')));
+gulp.task('build', gulp.series('prettier', gulp.parallel('tsc', 'tslint'), 'commit-hash'));
 gulp.task('changelog', gulp.series(validateArgs, createChangelog));
 gulp.task(
   'release',
-  gulp.series(validateArgs, updateVersion, createChangelog, createGitCommit, createGitTag)
+  gulp.series(
+    validateArgs,
+    updateVersion,
+    createChangelog,
+    'prettier',
+    createGitCommit,
+    createGitTag
+  )
 );
 gulp.task('default', gulp.series('build', 'test'));

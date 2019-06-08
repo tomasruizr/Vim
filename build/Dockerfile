@@ -1,7 +1,9 @@
-FROM node:8.11
+FROM node:10.15
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y xorg xvfb libxss-dev libgtk2.0-0 gconf2 libnss3 libasound2
+    apt-get install -y xorg xvfb libxss-dev libgtk-3-0 gconf2 libnss3 libasound2
 
 ENV CXX="g++-4.9"
 ENV CC="gcc-4.9"

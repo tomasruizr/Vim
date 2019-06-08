@@ -163,6 +163,21 @@ suite('Mode Normal', () => {
   });
 
   newTest({
+    title: "Can handle 'r\n'",
+    start: ['abc|defg', '12345'],
+    keysPressed: 'r\n',
+    end: ['abc', '|efg', '12345'],
+  });
+
+  // `r` only ever inserts one newline, regardless of count prefix
+  newTest({
+    title: "Can handle '<Count>r\n'",
+    start: ['abc|defg', '12345'],
+    keysPressed: '3r\n',
+    end: ['abc', '|g', '12345'],
+  });
+
+  newTest({
     title: "Can handle 'J' once",
     start: ['one', 'tw|o'],
     keysPressed: 'kJ',
@@ -272,5 +287,19 @@ suite('Mode Normal', () => {
     start: ['one', '|two', 'three'],
     keysPressed: 'ddkPjddu',
     end: ['two', '|one', 'three'],
+  });
+
+  newTest({
+    title: "Can handle 'ge' in multiple lines case1",
+    start: ['one two', 'three', 'four five|'],
+    keysPressed: 'gege',
+    end: ['one two', 'thre|e', 'four five'],
+  });
+
+  newTest({
+    title: "Can handle 'ge' in multiple lines case2",
+    start: ['one two', 'three', 'four five|'],
+    keysPressed: 'gegegegege',
+    end: ['|one two', 'three', 'four five'],
   });
 });

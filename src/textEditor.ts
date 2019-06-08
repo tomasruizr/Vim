@@ -1,18 +1,33 @@
 import * as vscode from 'vscode';
 
-import { Position, PositionDiff } from './common/motion/position';
+import { Position } from './common/motion/position';
 import { configuration } from './configuration/configuration';
-import { VimState } from './state/vimState';
-import { ReplaceTextTransformation } from './transformations/transformations';
 
+/**
+ * Collection of helper functions around vscode.window.activeTextEditor
+ */
 export class TextEditor {
   static readonly whitespaceRegExp = new RegExp('^ *$');
 
   // TODO: Refactor args
 
   /**
-   * Do not use this method! It has been deprecated. Use InsertTextTransformation
-   * (or possibly InsertTextVSCodeTransformation) instead.
+   * Verify that a tab is even open for the TextEditor to act upon.
+   *
+   * This class was designed assuming there will usually be an active editor
+   * to act upon, which is usually true with editor hotkeys.
+   *
+   * But there are cases where an editor won't be active, such as running
+   * code on VSCodeVim activation, where you might see the error:
+   * > [Extension Host] Here is the error stack:
+   * > TypeError: Cannot read property 'document' of undefined
+   */
+  static get isActive() {
+    return vscode.window.activeTextEditor != null;
+  }
+
+  /**
+   * @deprecated Use InsertTextTransformation (or InsertTextVSCodeTransformation) instead.
    */
   static async insert(
     text: string,
@@ -45,6 +60,9 @@ export class TextEditor {
     return true;
   }
 
+  /**
+   * @deprecated Use InsertTextTransformation (or InsertTextVSCodeTransformation) instead.
+   */
   static async insertAt(text: string, position: vscode.Position): Promise<boolean> {
     return vscode.window.activeTextEditor!.edit(editBuilder => {
       editBuilder.insert(position, text);
@@ -66,57 +84,12 @@ export class TextEditor {
   }
 
   /**
-   * Removes all text in the entire document.
-   */
-  static async deleteDocument(): Promise<boolean> {
-    const start = new vscode.Position(0, 0);
-    const lastLine = vscode.window.activeTextEditor!.document.lineCount - 1;
-    const end = vscode.window.activeTextEditor!.document.lineAt(lastLine).range.end;
-    const range = new vscode.Range(start, end);
-
-    return vscode.window.activeTextEditor!.edit(editBuilder => {
-      editBuilder.delete(range);
-    });
-  }
-
-  /**
-   * Do not use this method! It has been deprecated. Use ReplaceTextTransformation.
-   * instead.
+   * @deprecated. Use ReplaceTextTransformation instead.
    */
   static async replace(range: vscode.Range, text: string): Promise<boolean> {
     return vscode.window.activeTextEditor!.edit(editBuilder => {
       editBuilder.replace(range, text);
     });
-  }
-
-  /**
-   * This is the correct replace method to use. (Notice how it's not async? Yep)
-   */
-  static replaceText(
-    vimState: VimState,
-    text: string,
-    start: Position,
-    end: Position,
-    diff: PositionDiff | undefined = undefined
-  ): void {
-    const trans: ReplaceTextTransformation = {
-      type: 'replaceText',
-      text,
-      start,
-      end,
-    };
-
-    if (diff) {
-      trans.diff = diff;
-    }
-
-    vimState.recordedState.transformations.push(trans);
-  }
-
-  static readLine(): string {
-    const lineNo = vscode.window.activeTextEditor!.selection.active.line;
-
-    return vscode.window.activeTextEditor!.document.lineAt(lineNo).text;
   }
 
   static readLineAt(lineNo: number): string {
@@ -131,8 +104,9 @@ export class TextEditor {
     return vscode.window.activeTextEditor!.document.lineAt(lineNo).text;
   }
 
-  static getLineCount(): number {
-    return vscode.window.activeTextEditor!.document.lineCount;
+  static getLineCount(textEditor?: vscode.TextEditor): number {
+    textEditor = textEditor || vscode.window.activeTextEditor;
+    return textEditor ? textEditor.document.lineCount : -1;
   }
 
   static getLineAt(position: vscode.Position): vscode.TextLine {
@@ -256,8 +230,7 @@ export class TextEditor {
 
   static getPositionAt(offset: number): Position {
     const pos = vscode.window.activeTextEditor!.document.positionAt(offset);
-
-    return new Position(pos.line, pos.character);
+    return Position.FromVSCodePosition(pos);
   }
 
   static getOffsetAt(position: Position): number {
@@ -275,10 +248,6 @@ export type EditorScrollDirection = 'up' | 'down';
  */
 export type EditorScrollByUnit = 'line' | 'wrappedLine' | 'page' | 'halfPage';
 
-/**
- * Values for reveal line 'at' argument
- */
-export type RevealLineAtArgument = 'top' | 'center' | 'bottom';
 /**
  * Positions in the view for cursor move command.
  */

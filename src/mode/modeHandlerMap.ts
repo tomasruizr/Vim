@@ -1,5 +1,3 @@
-import * as vscode from 'vscode';
-import { EditorIdentity } from '../editorIdentity';
 import { ModeHandler } from './modeHandler';
 
 class ModeHandlerMapImpl {
@@ -10,7 +8,7 @@ class ModeHandlerMapImpl {
     let modeHandler = this.modeHandlerMap[key];
     if (!modeHandler) {
       isNew = true;
-      modeHandler = await new ModeHandler();
+      modeHandler = await ModeHandler.Create();
       this.modeHandlerMap[key] = modeHandler;
     }
     return [modeHandler, isNew];

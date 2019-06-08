@@ -7,20 +7,27 @@ import { ModeHandler } from '../../src/mode/modeHandler';
 import { Configuration } from '../testConfiguration';
 import { assertEqual, setupWorkspace, cleanUpWorkspace } from '../testUtils';
 import { IKeyRemapping } from '../../src/configuration/iconfiguration';
+import { IRegisterContent, Register } from '../../src/register/register';
 import { getAndUpdateModeHandler } from '../../extension';
+import { VimState } from '../../src/state/vimState';
 
 /* tslint:disable:no-string-literal */
 
 suite('Remapper', () => {
   let modeHandler: ModeHandler;
+  let vimState: VimState;
   const leaderKey = '\\';
-  const insertModeKeyBindings: IKeyRemapping[] = [
+  const defaultInsertModeKeyBindings: IKeyRemapping[] = [
     {
       before: ['j', 'j'],
       after: ['<Esc>'],
     },
+    {
+      before: ['<c-e>'],
+      after: ['<Esc>'],
+    },
   ];
-  const normalModeKeyBindings: IKeyRemapping[] = [
+  const defaultNormalModeKeyBindings: IKeyRemapping[] = [
     {
       before: ['leader', 'w'],
       commands: [
@@ -39,8 +46,20 @@ suite('Remapper', () => {
         },
       ],
     },
+    {
+      before: ['d'],
+      after: ['"', '_', 'd'],
+    },
+    {
+      before: ['y', 'y'],
+      after: ['y', 'l'],
+    },
+    {
+      before: ['e'],
+      after: ['$'],
+    },
   ];
-  const visualModeKeyBindings: IKeyRemapping[] = [
+  const defaultVisualModeKeyBindings: IKeyRemapping[] = [
     {
       before: ['leader', 'c'],
       commands: [
@@ -58,40 +77,55 @@ suite('Remapper', () => {
     }
 
     public findMatchingRemap(
-      userDefinedRemappings: { [key: string]: IKeyRemapping },
+      userDefinedRemappings: Map<string, IKeyRemapping>,
       inputtedKeys: string[],
       currentMode: ModeName
     ) {
-      return TestRemapper._findMatchingRemap(userDefinedRemappings, inputtedKeys, currentMode);
+      return super.findMatchingRemap(userDefinedRemappings, inputtedKeys, currentMode);
     }
 
-    public getRemappedKeySequenceLengthRange(remappings: {
-      [key: string]: IKeyRemapping;
-    }): [number, number] {
-      return TestRemapper._getRemappedKeysLengthRange(remappings);
+    public getRemappedKeySequenceLengthRange(
+      remappings: Map<string, IKeyRemapping>
+    ): [number, number] {
+      return TestRemapper.getRemappedKeysLengthRange(remappings);
     }
   }
 
-  setup(async () => {
+  const setupWithBindings = async ({
+    insertModeKeyBindings,
+    normalModeKeyBindings,
+    visualModeKeyBindings,
+  }: {
+    insertModeKeyBindings?: IKeyRemapping[];
+    normalModeKeyBindings?: IKeyRemapping[];
+    visualModeKeyBindings?: IKeyRemapping[];
+  }) => {
     let configuration = new Configuration();
     configuration.leader = leaderKey;
-    configuration.insertModeKeyBindings = insertModeKeyBindings;
-    configuration.normalModeKeyBindings = normalModeKeyBindings;
-    configuration.visualModeKeyBindings = visualModeKeyBindings;
+    configuration.insertModeKeyBindings = insertModeKeyBindings || [];
+    configuration.normalModeKeyBindings = normalModeKeyBindings || [];
+    configuration.visualModeKeyBindings = visualModeKeyBindings || [];
 
     await setupWorkspace(configuration);
     modeHandler = await getAndUpdateModeHandler();
-  });
+    vimState = modeHandler.vimState;
+  };
 
   teardown(cleanUpWorkspace);
 
   test('getLongestedRemappedKeySequence', async () => {
     // setup
-    let remappings: { [key: string]: IKeyRemapping } = {
-      abc: { before: ['a', 'b', 'c'] },
-      de: { before: ['d', 'e'] },
-      f: { before: ['f'] },
-    };
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
+    let remappings: Map<string, IKeyRemapping> = new Map([
+      ['abc', { before: ['a', 'b', 'c'] }],
+      ['de', { before: ['d', 'e'] }],
+      ['f', { before: ['f'] }],
+    ]);
 
     // act
     const testRemapper = new TestRemapper();
@@ -103,6 +137,12 @@ suite('Remapper', () => {
   });
 
   test('getMatchingRemap', async () => {
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
     const testCases = [
       {
         // able to match number in normal mode
@@ -142,6 +182,7 @@ suite('Remapper', () => {
         input: 'jj',
         mode: ModeName.Insert,
         expectedAfter: '<Esc>',
+        expectedAfterMode: ModeName.Normal,
       },
       {
         // able to match with preceding keystrokes in insert mode
@@ -150,16 +191,26 @@ suite('Remapper', () => {
         input: 'hello world jj',
         mode: ModeName.Insert,
         expectedAfter: '<Esc>',
+        expectedAfterMode: ModeName.Normal,
+      },
+      {
+        // able to match with preceding keystrokes in insert mode
+        before: 'jj',
+        after: '<Esc>',
+        input: 'ifoo<Esc>ciwjj',
+        mode: ModeName.Insert,
+        expectedAfter: '<Esc>',
+        expectedAfterMode: ModeName.Normal,
       },
     ];
 
     for (const testCase of testCases) {
       // setup
-      let remappings: { [key: string]: IKeyRemapping } = {};
-      remappings[testCase.before] = {
+      let remappings: Map<string, IKeyRemapping> = new Map();
+      remappings.set(testCase.before, {
         before: testCase.before.split(''),
         after: testCase.after.split(''),
-      };
+      });
 
       // act
       const testRemapper = new TestRemapper();
@@ -174,12 +225,17 @@ suite('Remapper', () => {
         assert(
           actual,
           `Expected remap for before=${testCase.before}. input=${testCase.input}. mode=${
-            testCase.mode
+            ModeName[testCase.mode]
           }.`
         );
         assert.deepEqual(actual!.after, testCase.expectedAfter.split(''));
       } else {
         assert.equal(actual, undefined);
+      }
+
+      if (testCase.expectedAfterMode) {
+        assertEqual(modeHandler.currentMode.name, testCase.expectedAfterMode);
+        assertEqual(modeHandler.vimState.currentMode, testCase.expectedAfterMode);
       }
     }
   });
@@ -188,6 +244,12 @@ suite('Remapper', () => {
     const expectedDocumentContent = 'lorem ipsum';
 
     // setup
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
     let remapper = new Remappers();
 
     const edit = new vscode.WorkspaceEdit();
@@ -217,6 +279,12 @@ suite('Remapper', () => {
 
   test('0 -> :wq through modehandler', async () => {
     // setup
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
     let remapper = new Remappers();
     assertEqual(modeHandler.currentMode.name, ModeName.Normal);
 
@@ -233,8 +301,51 @@ suite('Remapper', () => {
     assert.equal(vscode.window.visibleTextEditors.length, 0);
   });
 
+  test('<c-e> -> <esc> in insert mode should go to normal mode', async () => {
+    const expectedDocumentContent = 'lorem ipsum';
+
+    // setup
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
+    let remapper = new Remappers();
+
+    const edit = new vscode.WorkspaceEdit();
+    edit.insert(
+      vscode.window.activeTextEditor!.document.uri,
+      new vscode.Position(0, 0),
+      expectedDocumentContent
+    );
+    vscode.workspace.applyEdit(edit);
+
+    await modeHandler.handleKeyEvent('i');
+    assertEqual(modeHandler.currentMode.name, ModeName.Insert);
+
+    // act
+    let actual = false;
+    try {
+      actual = await remapper.sendKey(['<C-e>'], modeHandler, modeHandler.vimState);
+    } catch (e) {
+      assert.fail(e);
+    }
+
+    // assert
+    assert.equal(actual, true);
+    assertEqual(modeHandler.currentMode.name, ModeName.Normal);
+    assert.equal(vscode.window.activeTextEditor!.document.getText(), expectedDocumentContent);
+  });
+
   test('leader, w -> closeActiveEditor in normal mode through modehandler', async () => {
     // setup
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
     let remapper = new Remappers();
     assertEqual(modeHandler.currentMode.name, ModeName.Normal);
 
@@ -253,6 +364,12 @@ suite('Remapper', () => {
 
   test('leader, c -> closeActiveEditor in visual mode through modehandler', async () => {
     // setup
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
     let remapper = new Remappers();
     assertEqual(modeHandler.currentMode.name, ModeName.Normal);
 
@@ -270,6 +387,85 @@ suite('Remapper', () => {
     // assert
     assert.equal(actual, true);
     assert.equal(vscode.window.visibleTextEditors.length, 0);
+  });
+
+  test('d -> black hole register delete in normal mode through modehandler', async () => {
+    // setup
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
+    assert.equal(modeHandler.currentMode.name, ModeName.Normal);
+
+    await modeHandler.handleMultipleKeyEvents(['<Esc>', 'g', 'g']);
+    await modeHandler.handleMultipleKeyEvents(['i', 'line1', '<Esc>', '0']);
+
+    const expected = 'text-to-put-on-register';
+    let actual: IRegisterContent;
+    Register.put(expected, modeHandler.vimState);
+    actual = await Register.get(vimState);
+    assert.equal(actual.text, expected);
+
+    // act
+    await modeHandler.handleMultipleKeyEvents(['d', 'd']);
+
+    // assert
+    actual = await Register.get(vimState);
+    assert.equal(actual.text, expected);
+  });
+
+  test('d -> black hole register delete in normal mode through modehandler', async () => {
+    // setup
+    await setupWithBindings({
+      insertModeKeyBindings: defaultInsertModeKeyBindings,
+      normalModeKeyBindings: defaultNormalModeKeyBindings,
+      visualModeKeyBindings: defaultVisualModeKeyBindings,
+    });
+
+    assert.equal(modeHandler.currentMode.name, ModeName.Normal);
+
+    await modeHandler.handleMultipleKeyEvents(['<Esc>', 'g', 'g']);
+    await modeHandler.handleMultipleKeyEvents(['i', 'word1 word2', '<Esc>', '0']);
+
+    const expected = 'text-to-put-on-register';
+    let actual: IRegisterContent;
+    Register.put(expected, modeHandler.vimState);
+    actual = await Register.get(vimState);
+    assert.equal(actual.text, expected);
+
+    // act
+    await modeHandler.handleMultipleKeyEvents(['d', 'w']);
+
+    // assert
+    actual = await Register.get(vimState);
+    assert.equal(actual.text, expected);
+  });
+
+  test('jj -> <Esc> after ciw operator through modehandler', async () => {
+    // setup
+    await setupWithBindings({
+      insertModeKeyBindings: [
+        {
+          before: ['j', 'j'],
+          after: ['<Esc>'],
+        },
+      ],
+    });
+
+    assert.equal(modeHandler.currentMode.name, ModeName.Normal);
+    await modeHandler.handleMultipleKeyEvents(['<Esc>', 'g', 'g']);
+    await modeHandler.handleMultipleKeyEvents(['i', 'word1 word2', '<Esc>', '0']);
+    assert.equal(modeHandler.currentMode.name, ModeName.Normal);
+
+    // act
+    await modeHandler.handleMultipleKeyEvents(['c', 'i', 'w']);
+    assert.equal(modeHandler.currentMode.name, ModeName.Insert);
+    await modeHandler.handleMultipleKeyEvents(['j', 'j']);
+
+    // assert
+    assert.equal(modeHandler.currentMode.name, ModeName.Normal);
   });
 });
 

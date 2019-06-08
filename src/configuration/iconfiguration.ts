@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+export type Digraph = [string, number | number[]];
+
 export interface IModeSpecificStrings<T> {
   normal: T | undefined;
   insert: T | undefined;
@@ -15,12 +17,53 @@ export interface IKeyRemapping {
   commands?: ({ command: string; args: any[] } | string)[];
 }
 
+export interface IAutoSwitchInputMethod {
+  enable: boolean;
+  defaultIM: string;
+  switchIMCmd: string;
+  obtainIMCmd: string;
+}
+
 export interface IDebugConfiguration {
   /**
-   * Maximum level of messages to log.
-   * Supported values: ['error', 'warn', 'info', 'verbose', 'debug']
+   * Boolean indicating whether all logs should be suppressed
+   * This value overrides both `loggingLevelForAlert` and `loggingLevelForConsole`
    */
-  loggingLevel: string;
+  silent: boolean;
+
+  /**
+   * Maximum level of messages to show as VS Code information message
+   */
+  loggingLevelForAlert: 'error' | 'warn' | 'info' | 'verbose' | 'debug';
+
+  /**
+   * Maximum level of messages to log to console.
+   */
+  loggingLevelForConsole: 'error' | 'warn' | 'info' | 'verbose' | 'debug';
+}
+
+export interface IHighlightedYankConfiguration {
+  /**
+   * Boolean indicating whether yank highlighting should be enabled.
+   */
+  enable: boolean;
+
+  /**
+   * Color of the yank highlight.
+   */
+  color: string;
+
+  /**
+   * Duration in milliseconds of the yank highlight.
+   */
+  duration: number;
+}
+
+export interface ICamelCaseMotionConfiguration {
+  /**
+   * Enable CamelCaseMotion plugin or not
+   */
+  enable: boolean;
 }
 
 export interface IConfiguration {
@@ -64,6 +107,11 @@ export interface IConfiguration {
    * Indent automatically?
    */
   autoindent: boolean;
+
+  /**
+   * CamelCaseMotion plugin options
+   */
+  camelCaseMotion: ICamelCaseMotionConfiguration;
 
   /**
    * Use EasyMotion plugin?
@@ -142,7 +190,7 @@ export interface IConfiguration {
   /**
    * Status bar colors to change to based on mode
    */
-  statusBarColors: IModeSpecificStrings<string>;
+  statusBarColors: IModeSpecificStrings<string | string[]>;
 
   /**
    * Extension debugging settings
@@ -155,6 +203,11 @@ export interface IConfiguration {
   searchHighlightColor: string;
 
   /**
+   * Yank highlight settings.
+   */
+  highlightedyank: IHighlightedYankConfiguration;
+
+  /**
    * Size of a tab character.
    */
   tabstop: number;
@@ -162,7 +215,7 @@ export interface IConfiguration {
   /**
    * Type of cursor user is using native to vscode
    */
-  userCursor: vscode.TextEditorCursorStyle | undefined;
+  editorCursorStyle: vscode.TextEditorCursorStyle | undefined;
 
   /**
    * Use spaces when the user presses tab?
@@ -179,6 +232,10 @@ export interface IConfiguration {
    */
   relativenumber: boolean;
 
+  /**
+   * keywords contain alphanumeric characters and '_'.
+   * If not configured `editor.wordSeparators` is used
+   */
   iskeyword: string;
 
   /**
@@ -192,11 +249,21 @@ export interface IConfiguration {
   mouseSelectionGoesIntoVisualMode: boolean;
 
   /**
+   * Includes trailing whitespace when changing word.
+   */
+  changeWordIncludesWhitespace: boolean;
+
+  /**
    * Uses a hack to fix moving around folds.
    */
   foldfix: boolean;
 
-  disableExt: boolean;
+  /**
+   * "Soft"-disabling of extension.
+   * Differs from VS Code's disablng of the extension as the extension
+   * will still be loaded and activated, but all functionality will be disabled.
+   */
+  disableExtension: boolean;
 
   /**
    * Neovim
@@ -209,7 +276,10 @@ export interface IConfiguration {
    */
   substituteGlobalFlag: boolean;
 
-  modeToCursorStyleMap: IModeSpecificStrings<vscode.TextEditorCursorStyle>;
+  /**
+   * InputMethodSwicher
+   */
+  autoSwitchInputMethod: IAutoSwitchInputMethod;
 
   /**
    * Keybindings
@@ -221,8 +291,27 @@ export interface IConfiguration {
   visualModeKeyBindings: IKeyRemapping[];
   visualModeKeyBindingsNonRecursive: IKeyRemapping[];
 
+  insertModeKeyBindingsMap: Map<string, IKeyRemapping>;
+  insertModeKeyBindingsNonRecursiveMap: Map<string, IKeyRemapping>;
+  normalModeKeyBindingsMap: Map<string, IKeyRemapping>;
+  normalModeKeyBindingsNonRecursiveMap: Map<string, IKeyRemapping>;
+  visualModeKeyBindingsMap: Map<string, IKeyRemapping>;
+  visualModeKeyBindingsNonRecursiveMap: Map<string, IKeyRemapping>;
+
   /**
-   *  emulate whichwrap
+   * Comma-separated list of motion keys that should wrap to next/previous line.
    */
   whichwrap: string;
+
+  cursorStylePerMode: IModeSpecificStrings<string>;
+
+  /**
+   * Threshold to report changed lines to status bar
+   */
+  report: number;
+
+  /**
+   * User-defined digraphs
+   */
+  digraphs: { [shortcut: string]: Digraph };
 }
